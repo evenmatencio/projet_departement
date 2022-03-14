@@ -1,7 +1,7 @@
 """
 Class for integer points
 """
-
+import math
 import random as rd
 
 class Point():
@@ -41,6 +41,12 @@ class Point():
 
     def __eq__(self, point2):
         return self.x == point2.x and self.y == point2.y
+
+    def __sub__(self, point2):
+        return Point(self.x - point2.x, self.y - point2.y)
+
+    def norm2(self):
+        return math.sqrt(self.x**2 + self.y**2)
 
 
 if __name__ == "__main__":
