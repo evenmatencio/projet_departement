@@ -74,10 +74,26 @@ class Scooter():
         if self.coord == self.destination:
             self.moving = False
 
-    def init_new_trip(self,t):
-        if(self.moving==False):
-            
 
+
+    def init_new_trip(self,t,begin_hour):
+        if(self.moving==False):
+            p=np.rand()
+            if p<(0.5/sqrt(2*np.pi))*(np.exp(-(give_time(t,begin_hour)-8*3600))**2/(2*3600**2)+np.exp(-(give_time(t,begin_hour)-18*3600)**2/(2*3600**2))):
+                self.moving = True
+                new_destin = from_random(MAP_SIZE, MAP_SIZE)
+                while((self.coord-new_destin).norm2()<4):
+                    new_destin = from_random(MAP_SIZE, MAP_SIZE)
+                self.destination = new_destin
+                self.mass_user = rd.randint(0,1)
+
+
+def give_time(t,begin_hour):
+    time = (begin_hour*3600+t*7.2)%3600*24
+    if time>0:
+        return time
+    else:
+        return time+3600*24
 
 
 def simulation():
