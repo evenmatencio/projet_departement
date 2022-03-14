@@ -23,6 +23,7 @@ class Scooter():
         self._coord = coord
         self._moving = False
         self._destination = self._coord
+        self._mass_user = rd.randint(50,120)
 
     @property
     def coord(self):
@@ -39,6 +40,10 @@ class Scooter():
     @property
     def destination(self):
         return self._destination
+
+    @property
+    def mass_user(self):
+        return self._mass_user
 
     @coord.setter
     def coord(self, new_coord):
@@ -62,12 +67,16 @@ class Scooter():
         assert self.moving == True, "not moving"
         if self.coord.x != self.destination.x:
             self.coord.x = (self.coord.x + (self.destination.x - self.coord.x) / abs(self.destination.x - self.coord.x))
+            self.soc = self.soc-100*(50/20000)*(1+(self.mass_user-70)/70)
         elif self.coord.y != self.destination.y:
             self.coord.y = (self.coord.y + (self.destination.y - self.coord.y) / abs(self.destination.y - self.coord.y))
+            self.soc = self.soc - 100 * (50 / 20000) * (1 + (self.mass_user - 70) / 70)
         if self.coord == self.destination:
             self.moving = False
 
-    def display_style(self):
+    def init_new_trip(self,t):
+        if(self.moving==False):
+            
 
 
 
@@ -83,9 +92,6 @@ def simulation():
         y.append(scooter.coord.y)
     return x, y
 
-def update_point(n, x, y, point):
-    point.set_data(np.array([x[n], y[n]]))
-    return point
 
 
 if __name__ == "__main__":
@@ -107,13 +113,17 @@ if __name__ == "__main__":
 
     for t in range(50):
         if t == 0:
-            points, = ax.plot(x[0], y[0], marker='o', linestyle='None')
+            points, = ax.plot(x[0], y[0], marker='s', linestyle='-', color='g')
             ax.set_xlim(-1, 11)
             ax.set_ylim(-1, 11)
         else:
+            if(t==8):
+                points.set_color('r')
+                points.set_marker('o')
             new_x = x[t]
             new_y = y[t]
             points.set_data(new_x, new_y)
+
         plt.pause(0.5)
 
     # plt.show()
