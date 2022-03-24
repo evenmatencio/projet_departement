@@ -1,4 +1,3 @@
-
 import os
 import sys
 
@@ -8,7 +7,6 @@ sys.path.append(os.path.abspath("./"))
 
 from scooter import *
 from strategy import *
-
 
 # -------------------------------------------------------------------------------------------------------------------
 # GLOBAL VARIABLES
@@ -20,10 +18,8 @@ SIZE_OF_FLEET = 10
 "number of scooter in our simulation"
 BEGIN_HOUR = 12
 "hour of the begining of the simulation"
-CHARGING_DURATION = 1500
+CHARGING_DURATION = 500
 "average duration of the charging of a scooter"
-
-
 
 if __name__ == "__main__":
 
@@ -40,16 +36,19 @@ if __name__ == "__main__":
         ax.set_ylim(-20, MAP_SIZE + 20)
 
     time = 0
-    while time < TIME_RANGE :
+    while time < TIME_RANGE:
+
+        if (time % 250 == 0):
+            print(f"we did {time} time-steps")
 
         for t in range(CHARGING_SLOT):
-            time+=1
-            for (i,scooter) in enumerate(list_of_scooter):
+            time += 1
+            for (i, scooter) in enumerate(list_of_scooter):
 
-                if not scooter.charging :
+                if not scooter.charging:
                     scooter.init_new_trip(time, BEGIN_HOUR)
 
-                    if scooter.moving :
+                    if scooter.moving:
                         scooter.move()
 
                     new_x = scooter.coord.x
@@ -61,40 +60,43 @@ if __name__ == "__main__":
                         points[i].set_marker('o')
                     else:
                         points[i].set_marker('s')
+                else:
+                    # print(f"scooter {i} is charging")
+                    scooter.charging_time = scooter.charging_time + 1
+                    # if(t==200):
+                    #     print(f"charging time of {i} = {scooter.charging_time}")
+            plt.pause(0.01)
 
-            plt.pause(0.1)
+        recharged_list = [i for i in range(len(list_of_scooter)) if list_of_scooter[i].charging_time >= CHARGING_DURATION]
+        # recharged_list = []
+        # for i in range(len(list_of_scooter)):
+        #     # print(list_of_scooter[i].charging_time)
+        #     if list_of_scooter[i].charging_time >= CHARGING_DURATION:
+        #         recharged_list.append(i)
 
-                # else :
-                #     scooter.charging_time+=1
-                #     if scooter.charging_time >= CHARGING
-
-
-        discharged_list = [scooter.soc > DISCHARGE_THRESHOLD for scooter in list_of_scooter]
-        if sum(discharged_list) > int(SIZE_OF_FLEET*DISCHARGED_PROPORTION) :
-            for (i,scooter)in enumerate (list_of_scooter):
-                if  scooter.soc < PICK_UP_THERSHOLD:
-                    scooter.charging = True
-                    scooter.charging_time = 0
-                    points[i].set_data(-20, -20)
-                    points[i].set_color("black")
-
-
-        recharged_list = [i for i in range(len(list_of_scooter)) if list_of_scooter[i].charging_time > CHARGING_DURATION ]
+        print(recharged_list)
         if len(recharged_list) > 1:
-            for j in recharged_list :
+            for j in recharged_list:
                 list_of_scooter[j].charging_time = 0
                 list_of_scooter[j].charging = False
                 list_of_scooter[j].soc = CHARGING_LEVEL
                 init_pos = Point.from_random(MAP_SIZE, MAP_SIZE)
                 list_of_scooter[j].coord = init_pos
+                list_of_scooter[j].moving = False
+                points[j].set_data(init_pos.x, init_pos.y)
+                points[j].set_color(battery_colors(int(list_of_scooter[j].soc)))
+                points[j].set_marker('s')
 
-
-            
-        
-        
-
-
-
-
+        discharged_list = [(scooter.soc < DISCHARGE_THRESHOLD and scooter.moving == False) for scooter in
+                           list_of_scooter]
+        print(discharged_list)
+        if sum(discharged_list) >= int(SIZE_OF_FLEET * DISCHARGED_PROPORTION):
+            for (i, scooter) in enumerate(list_of_scooter):
+                if scooter.soc < PICK_UP_THERSHOLD and scooter.moving == False:
+                    scooter.charging = True
+                    scooter.charging_time = 0
+                    points[i].set_data(-20, -20)
+                    points[i].set_color("black")
+                    scooter.soc = CHARGING_LEVEL
 
 
