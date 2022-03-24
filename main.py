@@ -11,7 +11,7 @@ from scooter import *
 # GLOBAL VARIABLES
 # -------------------------------------------------------------------------------------------------------------------
 
-TIME_RANGE = 1000
+TIME_RANGE = 500
 "number of steps of the simulation"
 SIZE_OF_FLEET = 10
 "number of scooter in our simulation"
@@ -86,7 +86,11 @@ if __name__ == "__main__":
                     points[i].set_marker('s')
                 if (soc[i][t] <= 50):
                     points[i].set_color('r')
+                if (soc[i][t] <= 10):
+                    points[i].set_color('b')
                 new_x = x[i][t]
                 new_y = y[i][t]
                 points[i].set_data(new_x, new_y)
         plt.pause(0.1)
+        if(t%100==0):
+            print(f"{t} time steps from beginning")

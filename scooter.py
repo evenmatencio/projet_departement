@@ -98,6 +98,11 @@ class Scooter():
     # -------------------------------------------------------------------------------------------------------------------
     # USEFUL METHODS
     # -------------------------------------------------------------------------------------------------------------------
+    def estim_consumption(self, new_destination):
+        consumption = abs(self.coord.x-new_destination.x)*100*(SPACE_STEP/self.AVERAGE_DISTANCE)*(1+((self.mass_user-self.AVERAGE_MASS)/self.AVERAGE_MASS))
+        consumption += abs(self.coord.y-new_destination.y)*100*(SPACE_STEP/self.AVERAGE_DISTANCE)*(1+((self.mass_user-self.AVERAGE_MASS)/self.AVERAGE_MASS))
+        return consumption
+
 
     def move(self):
         """
@@ -122,12 +127,13 @@ class Scooter():
         if(self.moving==False and self.soc>=0):
             p = rd.random()
             if p<(0.5/math.sqrt(2*np.pi))*(np.exp(-(give_time(t,begin_hour)-8*3600))**2/(2*3600**2)+np.exp(-(give_time(t,begin_hour)-18*3600)**2/(2*3600**2))):
-                self.moving = True
+                self.mass_user = rd.randint(self.AVERAGE_MASS - 20, self.AVERAGE_MASS + 50)
                 new_destin = Point.from_random(MAP_SIZE, MAP_SIZE)
                 while((self.coord-new_destin).norm2()<4):
                     new_destin = Point.from_random(MAP_SIZE, MAP_SIZE)
-                self.destination = new_destin
-                self.mass_user = rd.randint(self.AVERAGE_MASS-20, self.AVERAGE_MASS+50)
+                if(self.estim_consumption(new_destin)<=self.soc):
+                    self.destination = new_destin
+                    self.moving = True
 
 
 def init_new_fleet(nbr_scooter):
@@ -181,5 +187,6 @@ if __name__ == "__main__":
             points.set_data(new_x, new_y)
 
         plt.pause(0.5)
+
 
     # plt.show()
