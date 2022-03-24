@@ -4,17 +4,15 @@ Class for scooters
 
 import os
 import sys
-
-sys.path.append(os.path.abspath("./"))
-
-from points import *
-
 import matplotlib.pyplot as plt
 import matplotlib.colors as plt_colors
-
 import numpy as np
 import random as rd
 import math
+
+sys.path.append(os.path.abspath("./"))
+from points import *
+
 
 # -------------------------------------------------------------------------------------------------------------------
 # GLOBAL VARIABLES
@@ -26,11 +24,13 @@ SPACE_STEP = 50
 MAP_SIZE = 200
 "The size of the map on which the scooters move [SPACE_STEP]"
 
+
 class Scooter():
 
-    # -------------------------------------------------------------------------------------------------------------------
-    # CLASS VARIABLES AND INITIALIZER
-    # -------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------------------
+# CLASS VARIABLES AND INITIALIZER
+# -------------------------------------------------------------------------------------------------------------------
+
 
     AVERAGE_DISTANCE = 20000
     "Average distance ran by a scooter on a trip [meter]"
@@ -47,11 +47,14 @@ class Scooter():
         self._coord = coord
         self._moving = False
         self._destination = self._coord
+        self._charging = False
+        self._charging_time = 0
         self._mass_user = rd.randint(self.AVERAGE_MASS-20, self.AVERAGE_MASS+50)
 
-    # -------------------------------------------------------------------------------------------------------------------
-    # READERS AND WRITERS
-    # -------------------------------------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------------------------------------
+# READERS AND WRITERS
+# -------------------------------------------------------------------------------------------------------------------
 
     @property
     def coord(self):
@@ -72,6 +75,14 @@ class Scooter():
     @property
     def mass_user(self):
         return self._mass_user
+
+    @property
+    def charging(self):
+        return self._charging
+
+    @property
+    def charging_time(self):
+        return self._charging_time
 
     @coord.setter
     def coord(self, new_coord):
@@ -95,9 +106,19 @@ class Scooter():
     def mass_user(self, new_mass):
         self._mass_user = new_mass
 
-    # -------------------------------------------------------------------------------------------------------------------
-    # USEFUL METHODS
-    # -------------------------------------------------------------------------------------------------------------------
+    @charging.setter
+    def charging(self, in_charge):
+        self._charging = in_charge
+
+    @charging_time.setter
+    def charging_time(self, time):
+        self._charging_time = time
+
+
+# -------------------------------------------------------------------------------------------------------------------
+# USEFUL METHODS
+# -------------------------------------------------------------------------------------------------------------------
+
     def estim_consumption(self, new_destination):
         consumption = abs(self.coord.x-new_destination.x)*100*(SPACE_STEP/self.AVERAGE_DISTANCE)*(1+((self.mass_user-self.AVERAGE_MASS)/self.AVERAGE_MASS))
         consumption += abs(self.coord.y-new_destination.y)*100*(SPACE_STEP/self.AVERAGE_DISTANCE)*(1+((self.mass_user-self.AVERAGE_MASS)/self.AVERAGE_MASS))
@@ -134,6 +155,7 @@ class Scooter():
                 if(self.estim_consumption(new_destin)<=self.soc):
                     self.destination = new_destin
                     self.moving = True
+
 
 
 def init_new_fleet(nbr_scooter):
@@ -189,4 +211,4 @@ if __name__ == "__main__":
         plt.pause(0.5)
 
 
-    # plt.show()
+    plt.show()
