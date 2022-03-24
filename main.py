@@ -68,6 +68,8 @@ if __name__ == "__main__":
             moving[i].append(list_of_scooter[i].moving)
 
     fig, ax = plt.subplots()
+    used_colors = ["r", "orangered", "tab:orange", "orange", "gold", "yellow"]
+    battery_colors = plt_colors.LinearSegmentedColormap.from_list("battery_colors", colors=used_colors, N=100)
     points = []
     for i in range(SIZE_OF_FLEET):
         points.append(i)
@@ -75,7 +77,7 @@ if __name__ == "__main__":
     for t in range(TIME_RANGE):
         if t == 0:
             for i in range(SIZE_OF_FLEET):
-                points[i], = ax.plot(x[0], y[0], marker='s', linestyle='None', color='g')
+                points[i], = ax.plot(x[0], y[0], marker='s', linestyle='None', color='green')
                 ax.set_xlim(-1, MAP_SIZE+1)
                 ax.set_ylim(-1, MAP_SIZE+1)
         else:
@@ -84,10 +86,10 @@ if __name__ == "__main__":
                     points[i].set_marker('o')
                 else:
                     points[i].set_marker('s')
-                if (soc[i][t] <= 50):
-                    points[i].set_color('r')
-                if (soc[i][t] <= 10):
-                    points[i].set_color('b')
+
+                points[i].set_color(battery_colors(int(soc[i][t])))
+                # if (soc[i][t] <= 50):
+                #     points[i].set_color('r')
                 new_x = x[i][t]
                 new_y = y[i][t]
                 points[i].set_data(new_x, new_y)
