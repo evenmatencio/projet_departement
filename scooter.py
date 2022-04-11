@@ -13,7 +13,6 @@ import math
 sys.path.append(os.path.abspath("./"))
 from points import *
 
-
 # -------------------------------------------------------------------------------------------------------------------
 # GLOBAL VARIABLES
 # -------------------------------------------------------------------------------------------------------------------
@@ -24,19 +23,28 @@ SPACE_STEP = 50
 MAP_SIZE = 200
 "The size of the map on which the scooters move [SPACE_STEP]"
 
+AMBIENT_TEMPERATURE = 293
+"Temperature in Celsius"
+EXCHANGE_SURFACE = 0.05
+"Surface of exchange with ambient air"
+BATTERY_MASS = 4
+"Mass in kilograms"
+BATTERY_THERMAL_CAPACITY = 1054
+"mass thermal capacity"
+STEEL_CONDUCTIVITY = 50
+"Thermic conductivity"
+BATTERY_EXTERIOR_WIDTH = 0.01
+
 
 class Scooter():
-
-# -------------------------------------------------------------------------------------------------------------------
-# CLASS VARIABLES AND INITIALIZER
-# -------------------------------------------------------------------------------------------------------------------
-
+    # -------------------------------------------------------------------------------------------------------------------
+    # CLASS VARIABLES AND INITIALIZER
+    # -------------------------------------------------------------------------------------------------------------------
 
     AVERAGE_DISTANCE = 20000
     "Average distance ran by a scooter on a trip [meter]"
     AVERAGE_MASS = 70
     "Averge mass of the scooters'users [kilogram]"
-
 
     def __init__(self, coord=Point(0, 0), soc=100):
         """
@@ -49,12 +57,12 @@ class Scooter():
         self._destination = self._coord
         self._charging = False
         self._charging_time = 0
-        self._mass_user = rd.randint(self.AVERAGE_MASS-20, self.AVERAGE_MASS+50)
+        self._mass_user = rd.randint(self.AVERAGE_MASS - 20, self.AVERAGE_MASS + 50)
+        self._temperature = AMBIENT_TEMPERATURE
 
-
-# -------------------------------------------------------------------------------------------------------------------
-# READERS AND WRITERS
-# -------------------------------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------------------------------------------------
+    # READERS AND WRITERS
+    # -------------------------------------------------------------------------------------------------------------------
 
     @property
     def coord(self):
@@ -84,9 +92,13 @@ class Scooter():
     def charging_time(self):
         return self._charging_time
 
+    @property
+    def temperature(self):
+        return self._temperature
+
     @coord.setter
     def coord(self, new_coord):
-        assert new_coord.x > 0 and new_coord.y > 0, "negative coordinates"
+        assert new_coord.x >= 0 and new_coord.y >= 0, "negative coordinates"
         self._coord = new_coord
 
     @soc.setter
@@ -114,16 +126,21 @@ class Scooter():
     def charging_time(self, time):
         self._charging_time = time
 
+    @temperature.setter
+    def temperature(self, temp):
+        assert temp >= 0, "temperature not negative"
+        self._temperature = temp
 
-# -------------------------------------------------------------------------------------------------------------------
-# USEFUL METHODS
-# -------------------------------------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------------------------------------------------
+    # USEFUL METHODS
+    # -------------------------------------------------------------------------------------------------------------------
 
     def estim_consumption(self, new_destination):
-        consumption = abs(self.coord.x-new_destination.x)*100*(SPACE_STEP/self.AVERAGE_DISTANCE)*(1+((self.mass_user-self.AVERAGE_MASS)/self.AVERAGE_MASS))
-        consumption += abs(self.coord.y-new_destination.y)*100*(SPACE_STEP/self.AVERAGE_DISTANCE)*(1+((self.mass_user-self.AVERAGE_MASS)/self.AVERAGE_MASS))
+        consumption = abs(self.coord.x - new_destination.x) * 100 * (SPACE_STEP / self.AVERAGE_DISTANCE) * (
+                1 + ((self.mass_user - self.AVERAGE_MASS) / self.AVERAGE_MASS))
+        consumption += abs(self.coord.y - new_destination.y) * 100 * (SPACE_STEP / self.AVERAGE_DISTANCE) * (
+                1 + ((self.mass_user - self.AVERAGE_MASS) / self.AVERAGE_MASS))
         return consumption
-
 
     def move(self):
         """
@@ -131,31 +148,47 @@ class Scooter():
         A scooter first moves on x_axis and after on y_axis.
         """
         assert self.moving, "not moving"
-        if(self.soc-100*(SPACE_STEP/self.AVERAGE_DISTANCE)*(1+((self.mass_user-self.AVERAGE_MASS)/self.AVERAGE_MASS))>=0):
+        if (self.soc - 100 * (SPACE_STEP / self.AVERAGE_DISTANCE) * (
+                1 + ((self.mass_user - self.AVERAGE_MASS) / self.AVERAGE_MASS)) >= 0):
             if self.coord.x != self.destination.x:
-                self.coord.x = (self.coord.x + (self.destination.x - self.coord.x) / abs(self.destination.x - self.coord.x))
-                self.soc = self.soc-100*(SPACE_STEP/self.AVERAGE_DISTANCE)*(1+((self.mass_user-self.AVERAGE_MASS)/self.AVERAGE_MASS))
+                self.coord.x = (
+                        self.coord.x + (self.destination.x - self.coord.x) / abs(self.destination.x - self.coord.x))
+                self.soc = self.soc - 100 * (SPACE_STEP / self.AVERAGE_DISTANCE) * (
+                        1 + ((self.mass_user - self.AVERAGE_MASS) / self.AVERAGE_MASS))
             elif self.coord.y != self.destination.y:
-                self.coord.y = (self.coord.y + (self.destination.y - self.coord.y) / abs(self.destination.y - self.coord.y))
-                self.soc = self.soc-100*(SPACE_STEP/self.AVERAGE_DISTANCE)*(1+((self.mass_user-self.AVERAGE_MASS)/self.AVERAGE_MASS))
+                self.coord.y = (
+                        self.coord.y + (self.destination.y - self.coord.y) / abs(self.destination.y - self.coord.y))
+                self.soc = self.soc - 100 * (SPACE_STEP / self.AVERAGE_DISTANCE) * (
+                        1 + ((self.mass_user - self.AVERAGE_MASS) / self.AVERAGE_MASS))
             if self.coord == self.destination:
                 self.moving = False
         else:
             self.moving = False
 
+    def temperature_evolution(self):
+        for i in range(7):
+            self.temperature = self.temperature + (1 / (BATTERY_MASS * BATTERY_THERMAL_CAPACITY)) * (
+                    (AMBIENT_TEMPERATURE - self.temperature) * (
+                        STEEL_CONDUCTIVITY / BATTERY_EXTERIOR_WIDTH) * EXCHANGE_SURFACE) + int(self.moving)*0.016
+        self.temperature = self.temperature + (0.2 / (BATTERY_MASS * BATTERY_THERMAL_CAPACITY)) * (
+                (AMBIENT_TEMPERATURE - self.temperature) * (
+                    STEEL_CONDUCTIVITY / BATTERY_EXTERIOR_WIDTH) * EXCHANGE_SURFACE) + 0.2*int(self.moving)*0.016
+        # if self.moving:
+        #     self.temperature = self.temperature + 7.2 * 0.016
 
-    def init_new_trip(self,t,begin_hour):
-        if(self.moving==False and self.soc>=0):
+    def init_new_trip(self, t, begin_hour):
+        if (self.moving == False and self.soc >= 0):
             p = rd.random()
-            if p<(0.5/math.sqrt(2*np.pi))*(np.exp(-(give_time(t,begin_hour)-8*3600))**2/(2*3600**2)+np.exp(-(give_time(t,begin_hour)-18*3600)**2/(2*3600**2))):
+            if p < (0.25 / math.sqrt(2 * np.pi)) * (
+                    np.exp(-(give_time(t, begin_hour) - 8 * 3600)) ** 2 / (2 * 3600 ** 2) + np.exp(
+                -(give_time(t, begin_hour) - 18 * 3600) ** 2 / (2 * 3600 ** 2))):
                 self.mass_user = rd.randint(self.AVERAGE_MASS - 20, self.AVERAGE_MASS + 50)
                 new_destin = Point.from_random(MAP_SIZE, MAP_SIZE)
-                while((self.coord-new_destin).norm2()<4):
+                while ((self.coord - new_destin).norm2() < 4):
                     new_destin = Point.from_random(MAP_SIZE, MAP_SIZE)
-                if(self.estim_consumption(new_destin)<=self.soc):
+                if (self.estim_consumption(new_destin) <= self.soc):
                     self.destination = new_destin
                     self.moving = True
-
 
 
 def init_new_fleet(nbr_scooter):
@@ -166,11 +199,11 @@ def init_new_fleet(nbr_scooter):
 
 
 def give_time(t, begin_hour):
-    time = (begin_hour*3600+t*7.2)%3600*24
-    if time>0:
+    time = (begin_hour * 3600 + t * 7.2) % 3600
+    if time > 0:
         return time
     else:
-        return time+3600*24
+        return time + 3600 * 24
 
 
 def simulation():
@@ -193,14 +226,13 @@ if __name__ == "__main__":
     x, y, soc = simulation()
     fig, ax = plt.subplots()
 
-
     for t in range(50):
         if t == 0:
             points, = ax.plot(x[0], y[0], marker='s', linestyle='None', color='g')
             ax.set_xlim(-1, 11)
             ax.set_ylim(-1, 11)
         else:
-            if(soc[t]<=98):
+            if (soc[t] <= 98):
                 points.set_color('r')
                 points.set_marker('o')
             print(soc[t])
@@ -209,6 +241,5 @@ if __name__ == "__main__":
             points.set_data(new_x, new_y)
 
         plt.pause(0.5)
-
 
     plt.show()
