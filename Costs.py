@@ -25,11 +25,11 @@ def near_enough(list_of_scooters,i,j):
     index = 0
     nbr_scooter = len(list_of_scooters)
     while founded==False and index<nbr_scooter:
-        difference = list_of_scooters[i].coord - current_point
-        distance = difference.norm2
+        difference = list_of_scooters[index].coord - current_point
+        distance = difference.norm2()
         if distance<=DISTANCE_FOR_DISTRIBUTION:
             founded = True
-        i+=1
+        index+=1
     return founded
 
 def measure_distribution(list_of_scooters,t):
