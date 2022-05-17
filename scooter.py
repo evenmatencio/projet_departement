@@ -25,7 +25,7 @@ MAP_SIZE = 200
 
 AMBIENT_TEMPERATURE = 293
 "Temperature in Celsius"
-EXCHANGE_SURFACE = 0.05
+EXCHANGE_SURFACE = 1 #0.05 on prends 1 en considérant que le R=0.75 prends deja en compte la surface
 "Surface of exchange with ambient air"
 BATTERY_MASS = 4
 "Mass in kilograms"
@@ -166,15 +166,24 @@ class Scooter():
             self.moving = False
 
     def temperature_evolution(self):
-        for i in range(7):
-            self.temperature = self.temperature + (1 / (BATTERY_MASS * BATTERY_THERMAL_CAPACITY)) * (
+        if not self.moving:
+            for i in range(7):
+                self.temperature = self.temperature + (1 / (BATTERY_MASS * BATTERY_THERMAL_CAPACITY)) * (
+                        (AMBIENT_TEMPERATURE - self.temperature) * (
+                            1/0.75) * EXCHANGE_SURFACE) + int(self.moving)*0.016
+            self.temperature = self.temperature + (0.2 / (BATTERY_MASS * BATTERY_THERMAL_CAPACITY)) * (
                     (AMBIENT_TEMPERATURE - self.temperature) * (
-                        STEEL_CONDUCTIVITY / BATTERY_EXTERIOR_WIDTH) * EXCHANGE_SURFACE) + int(self.moving)*0.016
-        self.temperature = self.temperature + (0.2 / (BATTERY_MASS * BATTERY_THERMAL_CAPACITY)) * (
-                (AMBIENT_TEMPERATURE - self.temperature) * (
-                    STEEL_CONDUCTIVITY / BATTERY_EXTERIOR_WIDTH) * EXCHANGE_SURFACE) + 0.2*int(self.moving)*0.016
-        # if self.moving:
-        #     self.temperature = self.temperature + 7.2 * 0.016
+                        1/0.75) * EXCHANGE_SURFACE) + 0.2*int(self.moving)*0.016
+        if self.moving:
+            for i in range(7):
+                self.temperature = self.temperature + (1 / (BATTERY_MASS * BATTERY_THERMAL_CAPACITY)) * (
+                        (AMBIENT_TEMPERATURE - self.temperature) * (
+                            1/0.375) * EXCHANGE_SURFACE) + int(self.moving)*0.016
+                self.temperature = self.temperature + 0.016
+            self.temperature = self.temperature + (0.2 / (BATTERY_MASS * BATTERY_THERMAL_CAPACITY)) * (
+                    (AMBIENT_TEMPERATURE - self.temperature) * (
+                        1/0.375) * EXCHANGE_SURFACE) + 0.2*int(self.moving)*0.016
+            self.temperature = self.temperature + 0.016 * 0.2
 
     def init_new_trip(self, t, begin_hour):
         if (self.moving == False and self.soc >= 0):
