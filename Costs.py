@@ -10,10 +10,20 @@ import numpy as np
 sys.path.append(os.path.abspath("./"))
 from scooter import *
 
+
+# -------------------------------------------------------------------------------------------------------------------
+# GLOBAL VARIABLES
+# -------------------------------------------------------------------------------------------------------------------
+
 DISTANCE_FOR_DISTRIBUTION = 5
-"the distance under which you don't have a penalty for the lack of response to the demand"
+'''the distance under which you don't have a penalty for the lack of response to the demand'''
 COST_DISTANCE_TRAVELLED =  0.0195
-"gasoline consumption per unit of idtance time price of gasoline plus amortisation of the pick-up vehicle"
+'''gasoline consumption per unit of distance time price of gasoline plus amortisation of the pick-up vehicle'''
+
+
+# -------------------------------------------------------------------------------------------------------------------
+# SOME FUNCTIONS
+# -------------------------------------------------------------------------------------------------------------------
 
 def ponderation_demand(t):
     #ici faudra ameliorer en prenant une fonction qui prends en compte la demande future
@@ -24,20 +34,20 @@ def near_enough(list_of_scooters,i,j):
     current_point = Point(i,j)
     index = 0
     nbr_scooter = len(list_of_scooters)
-    while founded==False and index<nbr_scooter:
+    while not(founded) and index < nbr_scooter:
         difference = list_of_scooters[index].coord - current_point
-        distance = difference.norm2()
-        if distance<=DISTANCE_FOR_DISTRIBUTION:
+        distance = difference.norm2
+        if distance <= DISTANCE_FOR_DISTRIBUTION and list_of_scooters[index].soc > 25:
             founded = True
-        index+=1
+        index += 1
     return founded
 
 def measure_distribution(list_of_scooters,t):
     cost_of_distribution = 0
     time_ponderation = ponderation_demand(t)
-    for i in range(0,MAP_SIZE,5):
-        for j in range(0,MAP_SIZE,5):
-            if near_enough(list_of_scooters,i,j) == False:
+    for i in range(0, MAP_SIZE, 5):
+        for j in range(0, MAP_SIZE, 5):
+            if not(near_enough(list_of_scooters, i, j)):
                 cost_of_distribution += time_ponderation*1
     return cost_of_distribution
 
