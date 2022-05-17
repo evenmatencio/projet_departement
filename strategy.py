@@ -21,7 +21,7 @@ from Costs import *
 # CHARGING_LEVEL = 80
 #
 
-MIN_DISTANCE = 50
+MIN_DISTANCE = 2
 
 def back_in_town(fleet):
     placed = False
