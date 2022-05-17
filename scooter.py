@@ -19,21 +19,24 @@ from points import *
 
 
 SPACE_STEP = 50
-"The distance separating two points of the map such that norm2(point1-point2) = 1 [meter]"
+'''The distance separating two points of the map such that norm2(point1-point2) = 1 [meter]'''
 MAP_SIZE = 200
-"The size of the map on which the scooters move [SPACE_STEP]"
+'''The size of the map on which the scooters move [SPACE_STEP]'''
 
+CHARGING_DURATION = 1500
+'''Average duration of the charging of a scooter'''
 AMBIENT_TEMPERATURE = 293
-"Temperature in Celsius"
+'''Temperature in Celsius'''
 EXCHANGE_SURFACE = 1 #0.05 on prends 1 en considérant que le R=0.75 prends deja en compte la surface
-"Surface of exchange with ambient air"
+'''Surface of exchange with ambient air'''
 BATTERY_MASS = 4
-"Mass in kilograms"
+'''Mass in kilograms'''
 BATTERY_THERMAL_CAPACITY = 1054
-"mass thermal capacity"
+'''mass thermal capacity'''
 STEEL_CONDUCTIVITY = 50
-"Thermic conductivity"
+'''Thermic conductivity'''
 BATTERY_EXTERIOR_WIDTH = 0.01
+
 
 
 class Scooter():
@@ -132,7 +135,7 @@ class Scooter():
         self._temperature = temp
 
     # -------------------------------------------------------------------------------------------------------------------
-    # USEFUL METHODS
+    # OTHER METHODS
     # -------------------------------------------------------------------------------------------------------------------
 
     def estim_consumption(self, new_destination):
@@ -186,18 +189,17 @@ class Scooter():
             self.temperature = self.temperature + 0.016 * 0.2
 
     def init_new_trip(self, t, begin_hour):
-        if (self.moving == False and self.soc >= 0):
-            p = rd.random()
-            if p < (0.25 / math.sqrt(2 * np.pi)) * (
-                    np.exp(-(give_time(t, begin_hour) - 8 * 3600)) ** 2 / (2 * 3600 ** 2) + np.exp(
-                -(give_time(t, begin_hour) - 18 * 3600) ** 2 / (2 * 3600 ** 2))):
-                self.mass_user = rd.randint(self.AVERAGE_MASS - 20, self.AVERAGE_MASS + 50)
+        p = rd.random()
+        if p < (0.25 / math.sqrt(2 * np.pi)) * \
+                (np.exp(-(give_time(t, begin_hour) - 8 * 3600)) ** 2 / (2 * 3600 ** 2) +
+                 np.exp(-(give_time(t, begin_hour) - 18 * 3600) ** 2 / (2 * 3600 ** 2))):
+            self.mass_user = rd.randint(self.AVERAGE_MASS - 20, self.AVERAGE_MASS + 50)
+            new_destin = Point.from_random(MAP_SIZE, MAP_SIZE)
+            while (self.coord - new_destin).norm2() < 4 :
                 new_destin = Point.from_random(MAP_SIZE, MAP_SIZE)
-                while ((self.coord - new_destin).norm2() < 4):
-                    new_destin = Point.from_random(MAP_SIZE, MAP_SIZE)
-                if (self.estim_consumption(new_destin) <= self.soc):
-                    self.destination = new_destin
-                    self.moving = True
+            if (self.estim_consumption(new_destin) <= self.soc):
+                self.destination = new_destin
+                self.moving = True
 
 
 def init_new_fleet(nbr_scooter):
@@ -207,12 +209,13 @@ def init_new_fleet(nbr_scooter):
     return list_of_scooter
 
 
-def give_time(t, begin_hour):
-    time = (begin_hour * 3600 + t * 7.2) % 3600
-    if time > 0:
-        return time
-    else:
-        return time + 3600 * 24
+def give_time(t, begin_hour=0):
+    '''
+    :param t: total time elapsed since the beginning of the simulation in [s]
+    :param begin_hour: hour of the beginning of the simulation in [h]
+    :return: the current time in second during in the frame of the current day
+    '''
+    return (begin_hour*3600 + 7.2*t) % 24*3600
 
 
 def simulation():

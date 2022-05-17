@@ -64,8 +64,8 @@ class Point():
 
 if __name__ == "__main__":
 
-    p = Point.from_random(189, 8)
-    print(p)
+    tup = (1, 2)
+    print(tup[0])
 
 
 
