@@ -7,7 +7,6 @@ sys.path.append(os.path.abspath("./"))
 
 from scooter import *
 from strategy import *
-from Costs import *
 
 # -------------------------------------------------------------------------------------------------------------------
 # GLOBAL VARIABLES
@@ -87,8 +86,8 @@ if __name__ == "__main__":
         # repartition_cost += measure_distribution(list_of_scooter, t)
 
     first_strategy = ChargingStrategy(TIME_RANGE, SIZE_OF_FLEET)
-    first_strategy.set_parameters(charging_slot = 200, discharged_proportion = 80, discharge_threshold = 20,
-                                  pick_up_threshold = 20, charging_level = 80)
+    first_strategy.set_parameters(charging_slot = 250, discharged_proportion = 0.20, discharge_threshold = 20,
+                                  pick_up_threshold = 30, charging_level = 80)
     first_strategy.launch()
 
 

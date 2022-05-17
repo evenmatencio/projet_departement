@@ -36,7 +36,7 @@ def near_enough(list_of_scooters,i,j):
     nbr_scooter = len(list_of_scooters)
     while not(founded) and index < nbr_scooter:
         difference = list_of_scooters[index].coord - current_point
-        distance = difference.norm2
+        distance = difference.norm2()
         if distance <= DISTANCE_FOR_DISTRIBUTION and list_of_scooters[index].soc > 25:
             founded = True
         index += 1
@@ -56,7 +56,7 @@ def transport_cost(returning_scooters):
     list_of_coords=[]
     for i in range(len(returning_scooters)):
         list_of_coords.append((returning_scooters[i].coord.x,returning_scooters[i].coord.x))
-    list_of_coords.apend((-20,-20))
+    list_of_coords.append((-20,-20))
     problem_no_fit = mlrose.TSPOpt(length=len(list_of_coords), coords=list_of_coords, maximize=False)
     best_state, best_fitness = mlrose.genetic_alg(problem_no_fit, random_state=2)
     return COST_DISTANCE_TRAVELLED*best_fitness
