@@ -17,3 +17,17 @@ PICK_UP_THERSHOLD = 30
 DISCHARGED_PROPORTION = 0.2
 "proportion of the total fleet below which we initiate the recharging tour"
 CHARGING_LEVEL = 80
+
+MIN_DISTANCE = 50
+
+
+def back_in_town(fleet):
+    placed = False
+    while placed == False:
+        point = Point.from_random(MAP_SIZE, MAP_SIZE)
+        far_enough = True
+        for other_scoot in fleet:
+            if ((point - other_scoot.coord).norm2() < MIN_DISTANCE):
+                far_enough = False
+        if far_enough:
+            return point
