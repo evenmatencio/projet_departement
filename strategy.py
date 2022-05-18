@@ -113,7 +113,7 @@ class ChargingStrategy():
         self.fig, self.ax = plt.subplots()
         self.points = []
         for scooter in self.list_of_scooter:
-            self.points.append(self.ax.plot(scooter.coord.x, scooter.coord.y, marker='s', linestyle='None', color='r')[0])
+            self.points.append(self.ax.plot(scooter.coord.x, scooter.coord.y, marker='s', linestyle='None', markersize=3, color='r')[0])
         self.ax.set_xlim(-20, MAP_SIZE + 20)
         self.ax.set_ylim(-20, MAP_SIZE + 20)
 

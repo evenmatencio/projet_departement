@@ -16,9 +16,11 @@ from scooter import *
 # -------------------------------------------------------------------------------------------------------------------
 
 DISTANCE_FOR_DISTRIBUTION = 5
-'''the distance under which you don't have a penalty for the lack of response to the demand'''
+'''the distance under which you don't have a penalty for the lack of response to the demand [space_step]'''
 COST_DISTANCE_TRAVELLED =  0.0195
 '''gasoline consumption per unit of distance time price of gasoline plus amortisation of the pick-up vehicle'''
+MIN_BATTERY_LEVEL = 25
+'''minimal required level of battery for considering that a scooter is available in a given zone'''
 
 
 # -------------------------------------------------------------------------------------------------------------------
@@ -34,10 +36,10 @@ def near_enough(list_of_scooters,i,j):
     current_point = Point(i,j)
     index = 0
     nbr_scooter = len(list_of_scooters)
-    while not(founded) and index < nbr_scooter:
+    while (not founded) and index < nbr_scooter:
         difference = list_of_scooters[index].coord - current_point
         distance = difference.norm2()
-        if distance <= DISTANCE_FOR_DISTRIBUTION and list_of_scooters[index].soc > 25:
+        if distance <= DISTANCE_FOR_DISTRIBUTION and list_of_scooters[index].soc > MIN_BATTERY_LEVEL:
             founded = True
         index += 1
     return founded
