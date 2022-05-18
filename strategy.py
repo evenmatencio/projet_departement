@@ -10,17 +10,6 @@ from scooter import *
 from Costs import *
 
 
-# CHARGING_SLOT = 250
-# "number of time steps between two potential charging slots"
-# DISCHARGE_THRESHOLD = 20
-# "threshold below which  we initiate a recharging tour [%]"
-# PICK_UP_THERSHOLD = 30
-# "threshlod below which we pick a scooter during a recharging tour [%]"
-# DISCHARGED_PROPORTION = 0.2
-# "proportion of the total fleet below which we initiate the recharging tour"
-# CHARGING_LEVEL = 80
-#
-
 MIN_DISTANCE = 2
 
 def back_in_town(fleet):
@@ -39,6 +28,9 @@ def back_in_town(fleet):
 # GLOBAL VARIABLES
 # -------------------------------------------------------------------------------------------------------------------
 
+COST_COMPUTATION_STEP = 100
+'''Number of time step separating two computations of the cost.'''
+
 USED_COLORS = ["r", "orangered", "tab:orange", "orange", "gold", "yellow"]
 BATTERY_COLORS = plt_colors.LinearSegmentedColormap.from_list("battery_colors", colors=USED_COLORS, N=100)
 '''Variables used to define the render of battery's level of the scooters'''
@@ -50,15 +42,18 @@ BATTERY_COLORS = plt_colors.LinearSegmentedColormap.from_list("battery_colors", 
 
 class ChargingStrategy():
 
-    def __init__(self, time_range, nbr_scooters):
+    def __init__(self, time_range, nbr_scooters, render=True, verbose=True):
         self.time_range = time_range
         self.nbr_scooters = nbr_scooters
         self.list_of_scooter = init_new_fleet(self.nbr_scooters)
         self.time = 0
-        self.init_plot()
         self.set_up = False
         self.transporting_cost = 0
         self.repartition_cost = 0
+        self.verbose = verbose
+        self.render = render
+        if self.render :
+            self.init_plot()
 
 
     def set_parameters(self, charging_slot, discharged_proportion, discharge_threshold, pick_up_threshold, charging_level):
@@ -81,27 +76,35 @@ class ChargingStrategy():
         assert self.set_up, "The strategy parameters are not defined !"
         # Environment evolution
         while self.time < self.time_range:
-            if (self.time % 250 == 0):
+            # Some outputs
+            if (self.verbose and self.time % 250 == 0 ):
                 print(f"we did {self.time} time-steps")
+                print("--------------------------------")
                 # print(f"maxtemp={maxtemp}")
                 print(f"transport_cost={self.transporting_cost}")
                 print(f"repartition_cost={self.repartition_cost}")
+                print("\n")
 
-            for t in range(self.charging_slot):
-                self.step()
-                plt.pause(0.01)
-            # Distribution of the charged scooters
-            recharged_list = [i for i in range(len(self.list_of_scooter)) if
-                              self.list_of_scooter[i].charging_time >= self.charging_duration]
-            print(f"recharged list len = {len(recharged_list)}")
-            print(f"time charging for scoot 0 = {self.list_of_scooter[0].charging_time}")
-            self.distribution(recharged_list)
-            # Charging the scooters that need it
-            discharged_list = [(scooter.soc < self.discharge_threshold and not scooter.moving)
-                               for scooter in self.list_of_scooter]
-            print(f"discharged list len = {len(discharged_list)}")
-            self.charging(discharged_list)
-            self.repartition_cost += measure_distribution(self.list_of_scooter,self.time)
+            # for t in range(self.charging_slot):
+            #     self.step()
+            #     #plt.pause(0.01)
+            self.step()
+            if self.time % self.charging_slot == 0 :
+                # Distribution of the charged scooters
+                recharged_list = [i for i in range(len(self.list_of_scooter)) if
+                                  self.list_of_scooter[i].charging_time >= self.charging_duration]
+                print(f"recharged list len = {len(recharged_list)}")
+                print(f"time charging for scoot 0 = {self.list_of_scooter[0].charging_time}")
+                self.distribution(recharged_list)
+                # Charging the scooters that need it
+                discharged_list = [(scooter.soc < self.discharge_threshold and not scooter.moving)
+                                   for scooter in self.list_of_scooter]
+                print(f"discharged list len = {len(discharged_list)}")
+                self.charging(discharged_list)
+                self.repartition_cost += measure_distribution(self.list_of_scooter, self.time)
+            if self.time % COST_COMPUTATION_STEP == 0:
+               self.repartition_cost += measure_distribution(self.list_of_scooter, self.time)
+
 
 
 
@@ -132,14 +135,16 @@ class ChargingStrategy():
                 elif (not scooter.moving) and (scooter.soc >= 0):
                     scooter.init_new_trip(self.time, 0)
                 # Updating plot
-                new_x = scooter.coord.x
-                new_y = scooter.coord.y
-                self.points[i].set_data(new_x, new_y)
-                self.points[i].set_color(BATTERY_COLORS(int(scooter.soc)))
-                if scooter.moving:
-                    self.points[i].set_marker('o')
-                else:
-                    self.points[i].set_marker('s')
+                if self.render :
+                    new_x = scooter.coord.x
+                    new_y = scooter.coord.y
+                    self.points[i].set_data(new_x, new_y)
+                    self.points[i].set_color(BATTERY_COLORS(int(scooter.soc)))
+                    if scooter.moving:
+                        self.points[i].set_marker('o')
+                    else:
+                        self.points[i].set_marker('s')
+                    plt.pause(0.001)
 
 
     def distribution(self, recharged_list):
@@ -148,14 +153,14 @@ class ChargingStrategy():
             for j in recharged_list:
                 self.list_of_scooter[j].charging_time = 0
                 self.list_of_scooter[j].charging = False
-                #init_pos = Point.from_random(MAP_SIZE, MAP_SIZE)
                 init_pos = back_in_town(self.list_of_scooter)
                 self.list_of_scooter[j].coord = init_pos
                 self.list_of_scooter[j].moving = False
-                self.points[j].set_data(init_pos.x, init_pos.y)
-                self.points[j].set_color(BATTERY_COLORS(int(self.list_of_scooter[j].soc)))
-                self.points[j].set_marker('s')
                 list_returning_scooter.append(self.list_of_scooter[j])
+                if self.render:
+                    self.points[j].set_data(init_pos.x, init_pos.y)
+                    self.points[j].set_color(BATTERY_COLORS(int(self.list_of_scooter[j].soc)))
+                    self.points[j].set_marker('s')
             self.transporting_cost += transport_cost(list_returning_scooter)
 
 
@@ -165,6 +170,7 @@ class ChargingStrategy():
                 if (scooter.soc < self.pick_up_threshold) and (not scooter.moving) :
                     scooter.charging = True
                     scooter.charging_time = 0
-                    self.points[i].set_data(-20, -20)
-                    self.points[i].set_color("black")
+                    if self.render :
+                        self.points[i].set_data(-20, -20)
+                        self.points[i].set_color("black")
                     scooter.soc = self.charging_level
