@@ -23,6 +23,11 @@ SPACE_STEP = 50
 MAP_SIZE = 200
 '''The size of the map on which the scooters move [SPACE_STEP]'''
 
+INTER_ARRIVAL_FACTOR = 60
+'''ensure that the mean inter-arrival time is about 20 minutes'''
+SIGMA = 2*3600
+'''standard deviation for the gaussian in the new trip'''
+
 CHARGING_DURATION = 1500
 '''Average duration of the charging of a scooter'''
 AMBIENT_TEMPERATURE = 293
@@ -190,7 +195,7 @@ class Scooter():
 
     def init_new_trip(self, t, begin_hour):
         p = rd.random()
-        proba = (0.25 / math.sqrt(2 * np.pi)) * (np.exp(-(give_time(t, begin_hour) - 8 * 3600) ** 2 / (2 * 3600 ** 2)) +np.exp(-(give_time(t, begin_hour) - 18 * 3600) ** 2 / (2 * 3600 ** 2)))
+        proba = (INTER_ARRIVAL_FACTOR / (SIGMA*math.sqrt(2 * np.pi))) * (np.exp(-(give_time(t, begin_hour) - 8 * 3600) ** 2 / (2 * SIGMA ** 2)) +np.exp(-(give_time(t, begin_hour) - 18 * 3600) ** 2 / (2 * SIGMA ** 2)))
         if p < proba:
             print(f"p={p}, proba={proba}")
             self.mass_user = rd.randint(self.AVERAGE_MASS - 20, self.AVERAGE_MASS + 50)

@@ -49,8 +49,8 @@ sigma=3600/7.2
 #     proba += (1 / (sigma * math.sqrt(2 * np.pi))) * (
 #         np.exp(-((t - 8 * 3600) ** 2) / (2 * sigma ** 2)))
 
-for t in range(int(8*3600-7*100), int(8*3600+7*150),7):
-    proba*=(1-(1/ (2*3600*math.sqrt(2 * np.pi))) * \
+for t in range(int(8*3600-7*60), int(8*3600+7*150),7):
+    proba*=(1-(60/ (2*3600*math.sqrt(2 * np.pi))) *
                 (np.exp(-(t - 8 * 3600) ** 2 / (2 * (2*3600) ** 2)) +
                  np.exp(-(t - 18 * 3600) ** 2 / (2 * (2*3600) ** 2))))
     # X.append(t)

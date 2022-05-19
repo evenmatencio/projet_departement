@@ -78,12 +78,13 @@ class ChargingStrategy():
         while self.time < self.time_range:
             # Some outputs
             if (self.verbose and self.time % 250 == 0 ):
+                print("\n")
                 print(f"we did {self.time} time-steps")
                 print("--------------------------------")
                 # print(f"maxtemp={maxtemp}")
                 print(f"transport_cost={self.transporting_cost}")
                 print(f"repartition_cost={self.repartition_cost}")
-                print("\n")
+
 
             # for t in range(self.charging_slot):
             #     self.step()
@@ -113,7 +114,7 @@ class ChargingStrategy():
         self.fig, self.ax = plt.subplots()
         self.points = []
         for scooter in self.list_of_scooter:
-            self.points.append(self.ax.plot(scooter.coord.x, scooter.coord.y, marker='s', linestyle='None', markersize=3, color='r')[0])
+            self.points.append(self.ax.plot(scooter.coord.x, scooter.coord.y, marker='s', linestyle='None', markersize=5, color='r')[0])
         self.ax.set_xlim(-20, MAP_SIZE + 20)
         self.ax.set_ylim(-20, MAP_SIZE + 20)
 
