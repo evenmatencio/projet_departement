@@ -12,6 +12,8 @@ from Costs import *
 
 MIN_DISTANCE = 2
 
+
+
 def back_in_town(fleet):
     placed = False
     while placed == False:
@@ -134,7 +136,7 @@ class ChargingStrategy():
                 if scooter.moving:
                     scooter.move()
                 elif (not scooter.moving) and (scooter.soc >= 0):
-                    scooter.init_new_trip(self.time, 0)
+                    scooter.init_new_trip(self.time, BEGIN_HOUR)
                 # Updating plot
                 if self.render :
                     new_x = scooter.coord.x
