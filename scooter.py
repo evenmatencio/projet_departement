@@ -6,9 +6,9 @@ import os
 import sys
 import matplotlib.pyplot as plt
 import matplotlib.colors as plt_colors
+
 import numpy as np
-import random as rd
-import math
+
 
 sys.path.append(os.path.abspath("./"))
 from points import *
@@ -23,10 +23,15 @@ SPACE_STEP = 50
 MAP_SIZE = 200
 '''The size of the map on which the scooters move [SPACE_STEP]'''
 
+INTEREST_POINT_1 = Point(MAP_SIZE - 30, 30) ; INTEREST_POINT_2 = Point(50, MAP_SIZE - 40)
+'''Interests points for trip destinations'''
+SPATIAL_SIGMA= MAP_SIZE/10
+'''Standart deviation for the spatial gaussian law on destination '''
+
 INTER_ARRIVAL_FACTOR = 60
 '''ensure that the mean inter-arrival time is about 20 minutes'''
-SIGMA = 2*3600
-'''standard deviation for the gaussian in the new trip'''
+TIME_SIGMA= 2*3600
+'''standard deviation for the temporal gaussian law in the new trip'''
 
 CHARGING_DURATION = 1500
 '''Average duration of the charging of a scooter'''
@@ -195,11 +200,12 @@ class Scooter():
 
     def init_new_trip(self, t, begin_hour):
         p = rd.random()
-        proba = (INTER_ARRIVAL_FACTOR / (SIGMA*math.sqrt(2 * np.pi))) * (np.exp(-(give_time(t, begin_hour) - 8 * 3600) ** 2 / (2 * SIGMA ** 2)) +np.exp(-(give_time(t, begin_hour) - 18 * 3600) ** 2 / (2 * SIGMA ** 2)))
+        proba = (INTER_ARRIVAL_FACTOR / (TIME_SIGMA*math.sqrt(2 * np.pi))) * (np.exp(-(give_time(t, begin_hour) - 8 * 3600) ** 2 / (2 * TIME_SIGMA** 2)) +np.exp(-(give_time(t, begin_hour) - 18 * 3600) ** 2 / (2 * TIME_SIGMA** 2)))
         if p < proba:
             print(f"p={p}, proba={proba}")
             self.mass_user = rd.randint(self.AVERAGE_MASS - 20, self.AVERAGE_MASS + 50)
-            new_destin = Point.from_random(MAP_SIZE, MAP_SIZE)
+            new_destin = give_destination()
+            #new_destin = Point.from_random(MAP_SIZE, MAP_SIZE)
             while (self.coord - new_destin).norm2() < 4 :
                 new_destin = Point.from_random(MAP_SIZE, MAP_SIZE)
             if (self.estim_consumption(new_destin) <= self.soc):
@@ -212,6 +218,28 @@ def init_new_fleet(nbr_scooter):
     for i in range(nbr_scooter):
         list_of_scooter.append(Scooter(Point.from_random(MAP_SIZE, MAP_SIZE)))
     return list_of_scooter
+
+
+def give_destination(max_attempts=50) :
+    spatial_ponderation = 1
+    attempts = 0
+    max_prob = 0
+    best_destin = Point.from_random(MAP_SIZE, MAP_SIZE)
+    p1 = INTEREST_POINT_1
+    p2 = INTEREST_POINT_2
+    while (attempts < max_attempts) :
+        attempts+=1
+        p = rd.random()
+        new_destin = Point.from_random(MAP_SIZE, MAP_SIZE)
+        new_destin_proba = ( spatial_ponderation / (2*np.pi*SPATIAL_SIGMA**2) ) \
+                            / ( np.exp(- (p1 - new_destin).norm2()**2 / (2 * SPATIAL_SIGMA**2) ) +
+                            np.exp(- (p2 - new_destin).norm2()**2 / (2 * SPATIAL_SIGMA**2) ) )
+        if p < new_destin_proba :
+            return new_destin
+        elif new_destin_proba > max_prob :
+            max_prob = new_destin_proba
+            best_destin = new_destin
+
 
 
 def give_time(t, begin_hour=0):

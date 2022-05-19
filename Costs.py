@@ -32,7 +32,7 @@ BEGIN_HOUR = 0
 # -------------------------------------------------------------------------------------------------------------------
 
 '''
-WHAT COULD BE DONE FOR COMPUTING TH EOPPORTUNITY COST :
+WHAT COULD BE DONE FOR COMPUTING THE OPPORTUNITY COST :
 
 - every AVERAGE_TRIP_DURATION we compute the opportunity cost
 
@@ -57,9 +57,9 @@ def time_demand(t):
     # ici faudra ameliorer en prenant une fonction qui prends en compte la demande future
     proba = 1
     for s in range(250):
-        proba *= (INTER_ARRIVAL_FACTOR / (SIGMA * math.sqrt(2 * np.pi))) * (
-                    np.exp(-(give_time(t + s, BEGIN_HOUR) - 8 * 3600) ** 2 / (2 * SIGMA ** 2)) + np.exp(
-            -(give_time(t + s, BEGIN_HOUR) - 18 * 3600) ** 2 / (2 * SIGMA ** 2)))
+        proba *= (INTER_ARRIVAL_FACTOR / (TIME_SIGMA * math.sqrt(2 * np.pi))) * (
+                    np.exp(-(give_time(t + s, BEGIN_HOUR) - 8 * 3600) ** 2 / (2 * TIME_SIGMA ** 2)) + np.exp(
+            -(give_time(t + s, BEGIN_HOUR) - 18 * 3600) ** 2 / (2 * TIME_SIGMA ** 2)))
     return 1-proba
 
 
