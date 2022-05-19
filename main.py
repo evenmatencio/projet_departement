@@ -22,7 +22,7 @@ BEGIN_HOUR = 0
 
 if __name__ == "__main__":
 
-    first_strategy = ChargingStrategy(TIME_RANGE, SIZE_OF_FLEET)
+    first_strategy = ChargingStrategy(TIME_RANGE, SIZE_OF_FLEET, render=True)
     first_strategy.set_parameters(charging_slot = 250, discharged_proportion = 0.20, discharge_threshold = 20,
                                   pick_up_threshold = 30, charging_level = 80)
     first_strategy.launch()
