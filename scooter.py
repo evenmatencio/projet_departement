@@ -151,7 +151,7 @@ class Scooter():
         A scooter first moves on x_axis and after on y_axis.
         """
         assert self.moving, "not moving"
-        if (self.soc - 100 * (SPACE_STEP / self.AVERAGE_DISTANCE) * (
+        if (self.soc - 100 * (SPACE_STEP / self.AVERAGE_TOTAL_DISTANCE) * (
                 1 + ((self.mass_user - self.AVERAGE_MASS) / self.AVERAGE_MASS)) >= 0):
             if self.coord.x != self.destination.x:
                 self.coord.x = \
@@ -190,9 +190,9 @@ class Scooter():
 
     def init_new_trip(self, t, begin_hour):
         p = rd.random()
-        if p < (0.25 / math.sqrt(2 * np.pi)) * \
-                (np.exp(-(give_time(t, begin_hour) - 8 * 3600)) ** 2 / (2 * 3600 ** 2) +
-                 np.exp(-(give_time(t, begin_hour) - 18 * 3600) ** 2 / (2 * 3600 ** 2))):
+        proba = (0.25 / math.sqrt(2 * np.pi)) * (np.exp(-(give_time(t, begin_hour) - 8 * 3600) ** 2 / (2 * 3600 ** 2)) +np.exp(-(give_time(t, begin_hour) - 18 * 3600) ** 2 / (2 * 3600 ** 2)))
+        if p < proba:
+            print(f"p={p}, proba={proba}")
             self.mass_user = rd.randint(self.AVERAGE_MASS - 20, self.AVERAGE_MASS + 50)
             new_destin = Point.from_random(MAP_SIZE, MAP_SIZE)
             while (self.coord - new_destin).norm2() < 4 :
