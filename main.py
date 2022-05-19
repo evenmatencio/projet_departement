@@ -14,7 +14,7 @@ from strategy import *
 
 TIME_RANGE = 5000
 "number of steps of the simulation"
-SIZE_OF_FLEET = 10
+SIZE_OF_FLEET = 150
 "number of scooter in our simulation"
 BEGIN_HOUR = 0
 "hour of the begining of the simulation"

@@ -44,8 +44,8 @@ class Scooter():
     # CLASS VARIABLES AND INITIALIZER
     # -------------------------------------------------------------------------------------------------------------------
 
-    AVERAGE_DISTANCE = 20000
-    "Average distance ran by a scooter on a trip [meter]"
+    AVERAGE_TOTAL_DISTANCE = 20000
+    "Average distance ran by a fully charged scooter [meter]"
     AVERAGE_MASS = 70
     "Averge mass of the scooters'users [kilogram]"
 
@@ -139,9 +139,9 @@ class Scooter():
     # -------------------------------------------------------------------------------------------------------------------
 
     def estim_consumption(self, new_destination):
-        consumption = abs(self.coord.x - new_destination.x) * 100 * (SPACE_STEP / self.AVERAGE_DISTANCE) * (
+        consumption = abs(self.coord.x - new_destination.x) * 100 * (SPACE_STEP / self.AVERAGE_TOTAL_DISTANCE) * (
                 1 + ((self.mass_user - self.AVERAGE_MASS) / self.AVERAGE_MASS))
-        consumption += abs(self.coord.y - new_destination.y) * 100 * (SPACE_STEP / self.AVERAGE_DISTANCE) * (
+        consumption += abs(self.coord.y - new_destination.y) * 100 * (SPACE_STEP / self.AVERAGE_TOTAL_DISTANCE) * (
                 1 + ((self.mass_user - self.AVERAGE_MASS) / self.AVERAGE_MASS))
         return consumption
 
@@ -154,15 +154,15 @@ class Scooter():
         if (self.soc - 100 * (SPACE_STEP / self.AVERAGE_DISTANCE) * (
                 1 + ((self.mass_user - self.AVERAGE_MASS) / self.AVERAGE_MASS)) >= 0):
             if self.coord.x != self.destination.x:
-                self.coord.x = (
-                        self.coord.x + (self.destination.x - self.coord.x) / abs(self.destination.x - self.coord.x))
-                self.soc = self.soc - 100 * (SPACE_STEP / self.AVERAGE_DISTANCE) * (
-                        1 + ((self.mass_user - self.AVERAGE_MASS) / self.AVERAGE_MASS))
+                self.coord.x = \
+                    (self.coord.x + (self.destination.x - self.coord.x) / abs(self.destination.x - self.coord.x))
+                self.soc = self.soc - 100 * (SPACE_STEP / self.AVERAGE_TOTAL_DISTANCE) * \
+                           (1 + ((self.mass_user - self.AVERAGE_MASS) / self.AVERAGE_MASS))
             elif self.coord.y != self.destination.y:
                 self.coord.y = (
                         self.coord.y + (self.destination.y - self.coord.y) / abs(self.destination.y - self.coord.y))
-                self.soc = self.soc - 100 * (SPACE_STEP / self.AVERAGE_DISTANCE) * (
-                        1 + ((self.mass_user - self.AVERAGE_MASS) / self.AVERAGE_MASS))
+                self.soc = self.soc - 100 * (SPACE_STEP / self.AVERAGE_TOTAL_DISTANCE) * \
+                        (1 + ((self.mass_user - self.AVERAGE_MASS) / self.AVERAGE_MASS))
             if self.coord == self.destination:
                 self.moving = False
         else:
