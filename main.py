@@ -12,7 +12,7 @@ from strategy import *
 # GLOBAL VARIABLES
 # -------------------------------------------------------------------------------------------------------------------
 
-TIME_RANGE = 5000
+TIME_RANGE = 50000
 "number of steps of the simulation"
 SIZE_OF_FLEET = 100
 "number of scooter in our simulation"

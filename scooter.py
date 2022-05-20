@@ -234,11 +234,12 @@ def give_destination(max_attempts=50) :
         new_destin_proba = ( spatial_ponderation / (2*np.pi*SPATIAL_SIGMA**2) ) \
                             / ( np.exp(- (p1 - new_destin).norm2()**2 / (2 * SPATIAL_SIGMA**2) ) +
                             np.exp(- (p2 - new_destin).norm2()**2 / (2 * SPATIAL_SIGMA**2) ) )
-        if p < new_destin_proba :
+        if p > new_destin_proba :
             return new_destin
         elif new_destin_proba > max_prob :
             max_prob = new_destin_proba
             best_destin = new_destin
+    print("Max attempts reached")
 
 
 
