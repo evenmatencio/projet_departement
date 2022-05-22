@@ -23,7 +23,7 @@ MIN_BATTERY_LEVEL = 25
 AVERAGE_TRIP_DURATION = 12
 '''Avergar trip duration in [minutes] taken from https://www.sciencedirect.com/science/article/pii/S2214367X19303126?ref=pdf_download&fr=RR-2&rr=70dc7315287a403d'''
 
-SPATIAL_COST_PONDERATION = 5*math.sqrt(SPATIAL_SIGMA)
+SPATIAL_COST_PONDERATION = 2*math.sqrt(SPATIAL_SIGMA)
 
 BEGIN_HOUR = 0
 "hour of the begining of the simulation"
