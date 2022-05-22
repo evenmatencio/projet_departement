@@ -1,7 +1,7 @@
 """
 Class for scooters
 """
-
+import math
 import os
 import sys
 import matplotlib.pyplot as plt
@@ -17,26 +17,12 @@ from points import *
 # GLOBAL VARIABLES
 # -------------------------------------------------------------------------------------------------------------------
 
-
-SPACE_STEP = 50
-'''The distance separating two points of the map such that norm2(point1-point2) = 1 [meter]'''
-MAP_SIZE = 200
-'''The size of the map on which the scooters move [SPACE_STEP]'''
-
-INTEREST_POINT_1 = Point(MAP_SIZE - 30, 30) ; INTEREST_POINT_2 = Point(50, MAP_SIZE - 40)
-'''Interests points for trip destinations'''
-SPATIAL_SIGMA= MAP_SIZE/10
-'''Standart deviation for the spatial gaussian law on destination '''
-
-INTER_ARRIVAL_FACTOR = 60
-'''ensure that the mean inter-arrival time is about 20 minutes'''
-TIME_SIGMA= 2*3600
-'''standard deviation for the temporal gaussian law in the new trip'''
-
+# SCOOTER CHARACTERISTICS
+#------------------------
+AVERAGE_SPEED = 20
+'''For the seek of simplification, the average speed is given as the highest speed allowed in cities [km/h]'''
 CHARGING_DURATION = 1500
 '''Average duration of the charging of a scooter'''
-AMBIENT_TEMPERATURE = 293
-'''Temperature in Celsius'''
 EXCHANGE_SURFACE = 1 #0.05 on prends 1 en considérant que le R=0.75 prends deja en compte la surface
 '''Surface of exchange with ambient air'''
 BATTERY_MASS = 4
@@ -47,6 +33,49 @@ STEEL_CONDUCTIVITY = 50
 '''Thermic conductivity'''
 BATTERY_EXTERIOR_WIDTH = 0.01
 
+
+# SIMULATIONS CHARACTERISTICS
+#----------------------------
+MAP_SIZE = 200
+'''The size of the map on which the scooters move [SPACE_STEP]'''
+INTEREST_POINT_1 = Point(MAP_SIZE - 30, 30)
+'''Interests points for trip destinations'''
+INTEREST_POINT_2 = Point(50, MAP_SIZE - 40)
+'''Interests points for trip destinations'''
+SPACE_STEP = 50
+'''The distance separating two points of the map such that norm2(point1-point2) = 1 [meter]'''
+TIME_STEP = int(SPACE_STEP / (AVERAGE_SPEED * 1000 / 3600 ))
+'''The time step is defined so that we don't need to care about the scooters speed'''
+AMBIENT_TEMPERATURE = 293
+'''Temperature in Celsius'''
+
+
+# PROBABILITIES CHARACTERISTICS
+#------------------------------
+SPATIAL_SIGMA= MAP_SIZE/5
+'''Standart deviation for the spatial gaussian law on destination '''
+SPATIAL_PONDERATION = 20*math.sqrt(SPATIAL_SIGMA)
+'''A coefficient supposed to make the spatial distribution more realistic'''
+TIME_SIGMA= 2*3600
+'''standard deviation for the temporal gaussian law in the new trip'''
+INTER_ARRIVAL_FACTOR = 17268 #60
+'''ensure that the mean inter-arrival time is about 20 minutes'''
+
+
+
+
+
+
+
+
+
+
+
+
+
+#-------------------------------------------------------------------------------------------------------------
+# CLASS DEFINITION
+#-------------------------------------------------------------------------------------------------------------
 
 
 class Scooter():
@@ -180,7 +209,7 @@ class Scooter():
 
     def temperature_evolution(self):
         if not self.moving:
-            for i in range(7):
+            for i in range(TIME_STEP):
                 self.temperature = self.temperature + (1 / (BATTERY_MASS * BATTERY_THERMAL_CAPACITY)) * (
                         (AMBIENT_TEMPERATURE - self.temperature) * (
                             1/0.75) * EXCHANGE_SURFACE) + int(self.moving)*0.016
@@ -188,7 +217,7 @@ class Scooter():
                     (AMBIENT_TEMPERATURE - self.temperature) * (
                         1/0.75) * EXCHANGE_SURFACE) + 0.2*int(self.moving)*0.016
         if self.moving:
-            for i in range(7):
+            for i in range(TIME_STEP):
                 self.temperature = self.temperature + (1 / (BATTERY_MASS * BATTERY_THERMAL_CAPACITY)) * (
                         (AMBIENT_TEMPERATURE - self.temperature) * (
                             1/0.375) * EXCHANGE_SURFACE) + int(self.moving)*0.016
@@ -200,17 +229,22 @@ class Scooter():
 
     def init_new_trip(self, t, begin_hour):
         p = rd.random()
-        proba = (INTER_ARRIVAL_FACTOR / (TIME_SIGMA*math.sqrt(2 * np.pi))) * (np.exp(-(give_time(t, begin_hour) - 8 * 3600) ** 2 / (2 * TIME_SIGMA** 2)) +np.exp(-(give_time(t, begin_hour) - 18 * 3600) ** 2 / (2 * TIME_SIGMA** 2)))
+        proba = time_distribution(t, begin_hour)
         if p < proba:
-            print(f"p={p}, proba={proba}")
             self.mass_user = rd.randint(self.AVERAGE_MASS - 20, self.AVERAGE_MASS + 50)
             new_destin = give_destination()
-            #new_destin = Point.from_random(MAP_SIZE, MAP_SIZE)
             while (self.coord - new_destin).norm2() < 4 :
-                new_destin = Point.from_random(MAP_SIZE, MAP_SIZE)
+                new_destin = give_destination()
             if (self.estim_consumption(new_destin) <= self.soc):
                 self.destination = new_destin
                 self.moving = True
+                # For debugging
+                return True
+
+
+#-------------------------------------------------------------------------------------------------------------
+# OTHER USEFUL FUNCTIONS
+#-------------------------------------------------------------------------------------------------------------
 
 
 def init_new_fleet(nbr_scooter):
@@ -225,31 +259,45 @@ def give_destination(max_attempts=50) :
     attempts = 0
     max_prob = 0
     best_destin = Point.from_random(MAP_SIZE, MAP_SIZE)
-    p1 = INTEREST_POINT_1
-    p2 = INTEREST_POINT_2
     while (attempts < max_attempts) :
         attempts+=1
         p = rd.random()
         new_destin = Point.from_random(MAP_SIZE, MAP_SIZE)
-        new_destin_proba = ( spatial_ponderation / (2*np.pi*SPATIAL_SIGMA**2) ) \
-                            / ( np.exp(- (p1 - new_destin).norm2()**2 / (2 * SPATIAL_SIGMA**2) ) +
-                            np.exp(- (p2 - new_destin).norm2()**2 / (2 * SPATIAL_SIGMA**2) ) )
-        if p > new_destin_proba :
+        new_destin_proba = SPATIAL_PONDERATION*spatial_distribution(new_destin)
+        if p < new_destin_proba :
             return new_destin
         elif new_destin_proba > max_prob :
             max_prob = new_destin_proba
             best_destin = new_destin
     print("Max attempts reached")
+    return best_destin
 
 
+
+def time_distribution(t, begin_hour=0):
+    '''WARNING : t must be a number of time steps'''
+    return (INTER_ARRIVAL_FACTOR / (2*math.sqrt(2 * np.pi)*TIME_SIGMA) ) * \
+            (np.exp(-(give_time(t, begin_hour) - 8 * 3600) ** 2 / (2 * TIME_SIGMA** 2)) +
+             np.exp(-(give_time(t, begin_hour) - 13 * 3600) ** 2 / (2 * (5*TIME_SIGMA) ** 2)) +
+            np.exp(-(give_time(t, begin_hour) - 18 * 3600) ** 2 / (2 * TIME_SIGMA** 2)))
+    # (2 * math.sqrt(2 * np.pi)*TIME_SIGMA**2)  *
+
+
+def spatial_distribution(position):
+    p1 = INTEREST_POINT_1
+    p2 = INTEREST_POINT_2
+    return ( 1 / (2 * math.sqrt(2*np.pi)*SPATIAL_SIGMA) ) \
+            * ( np.exp(- (p1 - position).norm2()**2 / (2 * SPATIAL_SIGMA**2) ) +
+            np.exp(- (p2 - position).norm2()**2 / (2 * SPATIAL_SIGMA**2) ) )
+            #(2 * math.sqrt(2*np.pi)*SPATIAL_SIGMA)
 
 def give_time(t, begin_hour=0):
     '''
     :param t: total time elapsed since the beginning of the simulation in [s]
     :param begin_hour: hour of the beginning of the simulation in [h]
-    :return: the current time in second during in the frame of the current day
+    :return: the current time in second in the frame of the current day
     '''
-    return (begin_hour*3600 + 7.2*t) % 24*3600
+    return (begin_hour*3600 + int(TIME_STEP)*t) % (24*3600)
 
 
 def simulation():
@@ -267,25 +315,13 @@ def simulation():
     return x, y, soc
 
 
+
 if __name__ == "__main__":
 
-    x, y, soc = simulation()
-    fig, ax = plt.subplots()
-
-    for t in range(50):
-        if t == 0:
-            points, = ax.plot(x[0], y[0], marker='s', linestyle='None', color='g')
-            ax.set_xlim(-1, 11)
-            ax.set_ylim(-1, 11)
-        else:
-            if (soc[t] <= 98):
-                points.set_color('r')
-                points.set_marker('o')
-            print(soc[t])
-            new_x = x[t]
-            new_y = y[t]
-            points.set_data(new_x, new_y)
-
-        plt.pause(0.5)
-
-    plt.show()
+    scooter = Scooter()
+    scooter._mass_user = Scooter.AVERAGE_MASS
+    scooter.moving = True
+    scooter._destination = Point(10, 10)
+    while (scooter.coord != scooter.destination):
+        scooter.move()
+    print(scooter._soc)

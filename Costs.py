@@ -23,6 +23,7 @@ MIN_BATTERY_LEVEL = 25
 AVERAGE_TRIP_DURATION = 12
 '''Avergar trip duration in [minutes] taken from https://www.sciencedirect.com/science/article/pii/S2214367X19303126?ref=pdf_download&fr=RR-2&rr=70dc7315287a403d'''
 
+SPATIAL_COST_PONDERATION = 5*math.sqrt(SPATIAL_SIGMA)
 
 BEGIN_HOUR = 0
 "hour of the begining of the simulation"
@@ -54,13 +55,10 @@ def space_demand(t):
 
 
 def time_demand(t):
-    # ici faudra ameliorer en prenant une fonction qui prends en compte la demande future
     proba = 1
     for s in range(250):
-        proba *= (INTER_ARRIVAL_FACTOR / (TIME_SIGMA * math.sqrt(2 * np.pi))) * (
-                    np.exp(-(give_time(t + s, BEGIN_HOUR) - 8 * 3600) ** 2 / (2 * TIME_SIGMA ** 2)) + np.exp(
-            -(give_time(t + s, BEGIN_HOUR) - 18 * 3600) ** 2 / (2 * TIME_SIGMA ** 2)))
-    return 1-proba
+        proba *= 1 - time_distribution(s + t)
+    return proba
 
 
 def near_enough(list_of_scooters, i, j):
@@ -79,21 +77,40 @@ def near_enough(list_of_scooters, i, j):
 
 def measure_distribution(list_of_scooters, t):
     unitary_cost = unitary_opportunity_cost()
-    time_ponderation = time_demand(t)
-    space_ponderation = space_demand(t)
+    time_ponderation = time_distribution(t)
     cost_of_distribution = 0
     for i in range(0, MAP_SIZE, 5):
         for j in range(0, MAP_SIZE, 5):
             if not (near_enough(list_of_scooters, i, j)):
+                space_ponderation = SPATIAL_COST_PONDERATION*spatial_distribution(Point(i, j))
                 cost_of_distribution += time_ponderation * space_ponderation * unitary_cost
     return cost_of_distribution
 
 
-def transport_cost(returning_scooters):
+def transport_cost(transported_scooters):
     list_of_coords = []
-    for i in range(len(returning_scooters)):
-        list_of_coords.append((returning_scooters[i].coord.x, returning_scooters[i].coord.x))
+    for i in range(len(transported_scooters)):
+        list_of_coords.append((transported_scooters[i].coord.x, transported_scooters[i].coord.x))
     list_of_coords.append((-20, -20))
     problem_no_fit = mlrose.TSPOpt(length=len(list_of_coords), coords=list_of_coords, maximize=False)
     best_state, best_fitness = mlrose.genetic_alg(problem_no_fit, random_state=2)
     return COST_DISTANCE_TRAVELLED * best_fitness
+
+
+if __name__ == "__main__":
+
+    # temps = range(0, int(2*24*3600 / TIME_STEP))
+    # temp_distri_function = [time_distribution(t) for t in temps]
+    # plt.plot(temps, temp_distri_function)
+    # plt.show()
+
+    reference_proba = 1
+    time_for_20_min = int(20*60 / TIME_STEP)
+    init_time = (8*3600 - 600) / TIME_STEP
+    for t in range(time_for_20_min):
+        reference_proba *= pow(time_distribution(init_time + t), 1/time_for_20_min)
+
+    coef = 0.9 / reference_proba
+    print(coef)
+
+    # print((3600 / TIME_STEP))

@@ -30,7 +30,7 @@ def back_in_town(fleet):
 # GLOBAL VARIABLES
 # -------------------------------------------------------------------------------------------------------------------
 
-COST_COMPUTATION_STEP = 100
+COST_COMPUTATION_STEP = 4*(3600 / TIME_STEP)
 '''Number of time step separating two computations of the cost.'''
 
 USED_COLORS = ["r", "orangered", "tab:orange", "orange", "gold", "yellow"]
@@ -54,6 +54,7 @@ class ChargingStrategy():
         self.repartition_cost = 0
         self.verbose = verbose
         self.render = render
+        self.total_departures = 0
         if self.render :
             self.init_plot()
 
@@ -78,20 +79,16 @@ class ChargingStrategy():
         assert self.set_up, "The strategy parameters are not defined !"
         # Environment evolution
         while self.time < self.time_range:
+            # Stepping the environment
+            self.step()
             # Some outputs
-            if (self.verbose and self.time % 250 == 0 ):
+            if (self.verbose and self.time % 400 == 0 ):
                 print("\n")
                 print(f"we did {self.time} time-steps")
                 print("--------------------------------")
-                # print(f"maxtemp={maxtemp}")
                 print(f"transport_cost={self.transporting_cost}")
                 print(f"repartition_cost={self.repartition_cost}")
-
-
-            # for t in range(self.charging_slot):
-            #     self.step()
-            #     #plt.pause(0.01)
-            self.step()
+            # Charging and replacing the scooters
             if self.time % self.charging_slot == 0 :
                 # Distribution of the charged scooters
                 recharged_list = [i for i in range(len(self.list_of_scooter)) if
@@ -102,13 +99,11 @@ class ChargingStrategy():
                 # Charging the scooters that need it
                 discharged_list = [(scooter.soc < self.discharge_threshold and not scooter.moving)
                                    for scooter in self.list_of_scooter]
-                print(f"discharged list len = {len(discharged_list)}")
                 self.charging(discharged_list)
                 self.repartition_cost += measure_distribution(self.list_of_scooter, self.time)
+            # Computing the cost
             if self.time % COST_COMPUTATION_STEP == 0:
                self.repartition_cost += measure_distribution(self.list_of_scooter, self.time)
-
-
 
 
 
@@ -126,17 +121,14 @@ class ChargingStrategy():
         for (i, scooter) in enumerate(self.list_of_scooter):
             # Updating state
             scooter.temperature_evolution()
-            # if scooter.temperature > maxtemp:
-            #     maxtemp = scooter.temperature
-            # if scooter.temperature < mintemp:
-            #     mintemp = scooter.temperature
             if scooter.charging:
                 scooter.charging_time = scooter.charging_time + 1
             else:
                 if scooter.moving:
                     scooter.move()
                 elif (not scooter.moving) and (scooter.soc >= 0):
-                    scooter.init_new_trip(self.time, BEGIN_HOUR)
+                    if scooter.init_new_trip(self.time, BEGIN_HOUR):
+                        self.total_departures+=1
                 # Updating plot
                 if self.render :
                     new_x = scooter.coord.x
@@ -169,11 +161,14 @@ class ChargingStrategy():
 
     def charging(self, discharged_list):
         if sum(discharged_list) >= int(self.nbr_scooters * self.discharged_proportion):
+            transported_scooters = []
             for (i, scooter) in enumerate(self.list_of_scooter):
                 if (scooter.soc < self.pick_up_threshold) and (not scooter.moving) :
                     scooter.charging = True
                     scooter.charging_time = 0
+                    scooter.soc = self.charging_level
+                    transported_scooters.append(scooter)
                     if self.render :
                         self.points[i].set_data(-20, -20)
                         self.points[i].set_color("black")
-                    scooter.soc = self.charging_level
+            self.transporting_cost += transport_cost(transported_scooters)
