@@ -42,7 +42,7 @@ BATTERY_COLORS = plt_colors.LinearSegmentedColormap.from_list("battery_colors", 
 # CLASS DEFINITION
 # -------------------------------------------------------------------------------------------------------------------
 
-class ChargingStrategy():
+class FirstChargingStrategy():
 
     def __init__(self, time_range, nbr_scooters, render=True, verbose=True):
         self.time_range = time_range
@@ -59,7 +59,7 @@ class ChargingStrategy():
             self.init_plot()
 
 
-    def set_parameters(self, charging_slot, discharged_proportion, discharge_threshold, pick_up_threshold, charging_level):
+    def set_parameters(self, discharged_proportion, discharge_threshold, pick_up_threshold, charging_level, charging_slot=0):
         self.set_up = True
         # set to true once the parameters of the strategy are defined
         self.charging_slot = charging_slot
@@ -172,3 +172,45 @@ class ChargingStrategy():
                         self.points[i].set_data(-20, -20)
                         self.points[i].set_color("black")
             self.transporting_cost += transport_cost(transported_scooters)
+
+
+class SecondChargingStrategy(FirstChargingStrategy):
+    '''
+    The difference between the first class of strategies and this one is that we check whether we have to charge the scooters
+    only when self.time reaches fixed instants in the day (like 0.0PM) instead of doing it each self.charging_slot instants
+    '''
+
+    def set_parameters(self, discharged_proportion, discharge_threshold, pick_up_threshold, charging_level, charging_slot):
+        super(SecondChargingStrategy, self).set_parameters(discharge_threshold, pick_up_threshold, charging_level, discharged_proportion)
+        self.charging_times = {11*3600, 22*3600}
+
+
+    def launch(self):
+        assert self.set_up, "The strategy parameters are not defined !"
+        # Environment evolution
+        while self.time < self.time_range:
+            # Stepping the environment
+            self.step()
+            # Some outputs
+            if (self.verbose and self.time % 400 == 0):
+                print("\n")
+                print(f"we did {self.time} time-steps")
+                print("--------------------------------")
+                print(f"transport_cost={self.transporting_cost}")
+                print(f"repartition_cost={self.repartition_cost}")
+            # Charging and replacing the scooters
+            if self.time in self.charging_times :
+                # Distribution of the charged scooters
+                recharged_list = [i for i in range(len(self.list_of_scooter)) if
+                                  self.list_of_scooter[i].charging_time >= self.charging_duration]
+                print(f"recharged list len = {len(recharged_list)}")
+                print(f"time charging for scoot 0 = {self.list_of_scooter[0].charging_time}")
+                self.distribution(recharged_list)
+                # Charging the scooters that need it
+                discharged_list = [(scooter.soc < self.discharge_threshold and not scooter.moving)
+                                   for scooter in self.list_of_scooter]
+                self.charging(discharged_list)
+                self.repartition_cost += measure_distribution(self.list_of_scooter, self.time)
+            # Computing the cost
+            if self.time % COST_COMPUTATION_STEP == 0:
+                self.repartition_cost += measure_distribution(self.list_of_scooter, self.time)

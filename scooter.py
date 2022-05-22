@@ -17,23 +17,6 @@ from points import *
 # GLOBAL VARIABLES
 # -------------------------------------------------------------------------------------------------------------------
 
-# SCOOTER CHARACTERISTICS
-#------------------------
-AVERAGE_SPEED = 20
-'''For the seek of simplification, the average speed is given as the highest speed allowed in cities [km/h]'''
-CHARGING_DURATION = 1500
-'''Average duration of the charging of a scooter'''
-EXCHANGE_SURFACE = 1 #0.05 on prends 1 en considérant que le R=0.75 prends deja en compte la surface
-'''Surface of exchange with ambient air'''
-BATTERY_MASS = 4
-'''Mass in kilograms'''
-BATTERY_THERMAL_CAPACITY = 1054
-'''mass thermal capacity'''
-STEEL_CONDUCTIVITY = 50
-'''Thermic conductivity'''
-BATTERY_EXTERIOR_WIDTH = 0.01
-
-
 # SIMULATIONS CHARACTERISTICS
 #----------------------------
 MAP_SIZE = 200
@@ -44,10 +27,28 @@ INTEREST_POINT_2 = Point(50, MAP_SIZE - 40)
 '''Interests points for trip destinations'''
 SPACE_STEP = 50
 '''The distance separating two points of the map such that norm2(point1-point2) = 1 [meter]'''
-TIME_STEP = int(SPACE_STEP / (AVERAGE_SPEED * 1000 / 3600 ))
-'''The time step is defined so that we don't need to care about the scooters speed'''
+TIME_STEP = int(SPACE_STEP / (20 * 1000 / 3600 ))
+'''The time step is defined so that we don't need to care about the scooters speed, 20 is the average_spee, see below'''
 AMBIENT_TEMPERATURE = 293
 '''Temperature in Celsius'''
+
+
+# SCOOTER CHARACTERISTICS
+#------------------------
+AVERAGE_SPEED = 20
+'''For the seek of simplification, the average speed is given as the highest speed allowed in cities [km/h]'''
+CHARGING_DURATION = 3*3600 / TIME_STEP
+'''Average duration of the charging of a scooter, '''
+EXCHANGE_SURFACE = 1 #0.05 on prends 1 en considérant que le R=0.75 prends deja en compte la surface
+'''Surface of exchange with ambient air'''
+BATTERY_MASS = 4
+'''Mass in kilograms'''
+BATTERY_THERMAL_CAPACITY = 1054
+'''mass thermal capacity'''
+STEEL_CONDUCTIVITY = 50
+'''Thermic conductivity'''
+BATTERY_EXTERIOR_WIDTH = 0.01
+
 
 
 # PROBABILITIES CHARACTERISTICS
