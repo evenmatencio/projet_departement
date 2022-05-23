@@ -199,7 +199,7 @@ class SecondChargingStrategy(FirstChargingStrategy):
                 print(f"transport_cost={self.transporting_cost}")
                 print(f"repartition_cost={self.repartition_cost}")
             # Charging and replacing the scooters
-            if self.time in self.charging_times :
+            if self.time%DAY_LENGTH in self.charging_times :
                 # Distribution of the charged scooters
                 recharged_list = [i for i in range(len(self.list_of_scooter)) if
                                   self.list_of_scooter[i].charging_time >= self.charging_duration]

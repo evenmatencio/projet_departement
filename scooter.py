@@ -29,6 +29,8 @@ SPACE_STEP = 50
 '''The distance separating two points of the map such that norm2(point1-point2) = 1 [meter]'''
 TIME_STEP = int(SPACE_STEP / (20 * 1000 / 3600 ))
 '''The time step is defined so that we don't need to care about the scooters speed, 20 is the average_spee, see below'''
+DAY_LENGTH = int(24*3600 / TIME_STEP)
+'''The number of time_step in a day'''
 AMBIENT_TEMPERATURE = 293
 '''Temperature in Celsius'''
 

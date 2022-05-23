@@ -12,9 +12,7 @@ from strategy import *
 # GLOBAL VARIABLES
 # -------------------------------------------------------------------------------------------------------------------
 
-DAY_LENGHT = int(24*3600 / TIME_STEP)
-'''The number of time_step in a day'''
-TIME_RANGE = DAY_LENGHT
+TIME_RANGE = DAY_LENGTH
 '''number of steps of the simulation'''
 SIZE_OF_FLEET = 100
 '''number of scooter in our simulation'''
