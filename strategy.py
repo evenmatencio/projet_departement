@@ -12,8 +12,6 @@ from Costs import *
 
 MIN_DISTANCE = 2
 
-
-
 def back_in_town(fleet):
     placed = False
     while placed == False:
@@ -82,7 +80,7 @@ class FirstChargingStrategy():
             # Stepping the environment
             self.step()
             # Some outputs
-            if (self.verbose and self.time % 400 == 0 ):
+            if (self.verbose and self.time % DAY_LENGTH == 0 ):
                 print("\n")
                 print(f"we did {self.time} time-steps")
                 print("--------------------------------")
@@ -93,8 +91,8 @@ class FirstChargingStrategy():
                 # Distribution of the charged scooters
                 recharged_list = [i for i in range(len(self.list_of_scooter)) if
                                   self.list_of_scooter[i].charging_time >= self.charging_duration]
-                print(f"recharged list len = {len(recharged_list)}")
-                print(f"time charging for scoot 0 = {self.list_of_scooter[0].charging_time}")
+                # print(f"recharged list len = {len(recharged_list)}")
+                # print(f"time charging for scoot 0 = {self.list_of_scooter[0].charging_time}")
                 self.distribution(recharged_list)
                 # Charging the scooters that need it
                 discharged_list = [(scooter.soc < self.discharge_threshold and not scooter.moving)
@@ -203,8 +201,6 @@ class SecondChargingStrategy(FirstChargingStrategy):
                 # Distribution of the charged scooters
                 recharged_list = [i for i in range(len(self.list_of_scooter)) if
                                   self.list_of_scooter[i].charging_time >= self.charging_duration]
-                print(f"recharged list len = {len(recharged_list)}")
-                print(f"time charging for scoot 0 = {self.list_of_scooter[0].charging_time}")
                 self.distribution(recharged_list)
                 # Charging the scooters that need it
                 discharged_list = [(scooter.soc < self.discharge_threshold and not scooter.moving)

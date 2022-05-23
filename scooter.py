@@ -272,7 +272,7 @@ def give_destination(max_attempts=50) :
         elif new_destin_proba > max_prob :
             max_prob = new_destin_proba
             best_destin = new_destin
-    print("Max attempts reached")
+    # print("Max attempts reached")
     return best_destin
 
 
