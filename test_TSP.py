@@ -16,6 +16,7 @@ list_coords = [(1, 1), (5, 4), (2, 5), (3, 8), (1, 2)]
 
 problem_no_fit = mlrose.TSPOpt(length=len(list_coords), coords=list_coords, maximize=False)
 
+
 best_state, best_fitness = mlrose.genetic_alg(problem_no_fit, random_state=2)
 
 print(f"best state = {best_state}")

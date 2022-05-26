@@ -6,7 +6,6 @@ import os
 import sys
 
 sys.path.append(os.path.abspath("./"))
-from scooter import *
 from Costs import *
 
 
@@ -16,12 +15,14 @@ def back_in_town(fleet):
     placed = False
     while placed == False:
         point = Point.from_random(MAP_SIZE, MAP_SIZE)
-        far_enough = True
-        for other_scoot in fleet:
-            if ((point - other_scoot.coord).norm2() < MIN_DISTANCE):
-                far_enough = False
-        if far_enough:
-            return point
+        p = rd.random()
+        if p < SPATIAL_PONDERATION*spatial_distribution(point):
+            far_enough = True
+            for other_scoot in fleet:
+                if ((point - other_scoot.coord).norm2() < MIN_DISTANCE):
+                    far_enough = False
+            if far_enough:
+                return point
 
 
 # -------------------------------------------------------------------------------------------------------------------
@@ -50,6 +51,7 @@ class FirstChargingStrategy():
         self.set_up = False
         self.transporting_cost = 0
         self.repartition_cost = 0
+        self.benefice = 0
         self.verbose = verbose
         self.render = render
         self.total_departures = 0
@@ -127,6 +129,7 @@ class FirstChargingStrategy():
                 elif (not scooter.moving) and (scooter.soc >= 0):
                     if scooter.init_new_trip(self.time, BEGIN_HOUR):
                         self.total_departures+=1
+                        self.benefice += scooter.cost_of_trip()
                 # Updating plot
                 if self.render :
                     new_x = scooter.coord.x

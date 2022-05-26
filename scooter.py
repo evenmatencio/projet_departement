@@ -245,6 +245,14 @@ class Scooter():
                 return True
 
 
+    def cost_of_trip(self):
+        unlock_cost = 1
+        cost_per_minute = 0.15  # https://www.tunneltime.io/en/paris-france/lime
+        distx = abs(self.coord.x - self.destination.x)
+        disty = abs(self.coord.y - self.destination.y)
+        time_h = (distx + disty)*(SPACE_STEP/1000)/20
+        time_m = time_h*60
+        return time_m * cost_per_minute + unlock_cost
 #-------------------------------------------------------------------------------------------------------------
 # OTHER USEFUL FUNCTIONS
 #-------------------------------------------------------------------------------------------------------------
@@ -301,6 +309,10 @@ def give_time(t, begin_hour=0):
     :return: the current time in second in the frame of the current day
     '''
     return (begin_hour*3600 + int(TIME_STEP)*t) % (24*3600)
+
+
+
+
 
 
 def simulation():

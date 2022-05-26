@@ -33,7 +33,8 @@ def exec_simul(input):
              "charging_level": input[4]}
     cost = {"transport": strategy.transporting_cost, "distribution": strategy.repartition_cost}
     total_cost = strategy.transporting_cost + strategy.repartition_cost
-    simulation = {"id": input[5], "param": param, "cost": cost, "total_cost": total_cost}
+    benef = strategy.benefice
+    simulation = {"id": input[5], "param": param, "cost": cost, "total_cost": total_cost, "benefice": benef}
     return simulation
 
 
@@ -57,10 +58,10 @@ if __name__ == "__main__":
     id = 0
     charging_lev = 80
     inputs_list = []
-    for discharged_thresh in np.linspace(10, 18, 3):  # 3
-        for discharged_prop in np.linspace(0.2, 0.8, 4):  # 4
-            for pick_up_threhs in np.linspace(15, 24, 4):  # 4
-                for charg_slot in [DAY_LENGTH // 3, DAY_LENGTH // 2, DAY_LENGTH]:
+    for discharged_thresh in np.linspace(15, 15, 1):  # 10 14 18
+        for discharged_prop in np.linspace(0.2, 0.8, 1):  # 4
+            for pick_up_threhs in np.linspace(15, 24, 1):  # 4
+                for charg_slot in [DAY_LENGTH // 3]: #, DAY_LENGTH // 2, DAY_LENGTH]:
                     # print(f"\n Simulation n°{id}")
                     inputs_list.append([charg_slot, discharged_prop, discharged_thresh, pick_up_threhs, charging_lev, id])
                     id+=1
@@ -80,6 +81,7 @@ if __name__ == "__main__":
                     # simulation = {"id" : id,  "param" : param, "cost" : cost, "total_cost" : total_cost}
                     # id+=1
                     # results_list.append(simulation)
+    print("main lunched")
     with Pool(4) as p:
         results_list = p.map(exec_simul, inputs_list)
 
