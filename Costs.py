@@ -99,18 +99,20 @@ def transport_cost(transported_scooters):
 
 if __name__ == "__main__":
 
-    # temps = range(0, int(2*24*3600 / TIME_STEP))
-    # temp_distri_function = [time_distribution(t) for t in temps]
-    # plt.plot(temps, temp_distri_function)
-    # plt.show()
+    temps = range(0, int(24*3600 / TIME_STEP))
+    temp_distri_function = [time_distribution(t) for t in temps]
+    plt.plot([TIME_STEP*t/3600 for t in temps], temp_distri_function)
+    plt.title("Temporal distribution of the demand (not normalized)")
+    plt.xlabel("Time [in h]")
+    plt.show()
 
-    reference_proba = 1
-    time_for_20_min = int(20*60 / TIME_STEP)
-    init_time = (8*3600 - 600) / TIME_STEP
-    for t in range(time_for_20_min):
-        reference_proba *= pow(time_distribution(init_time + t), 1/time_for_20_min)
-
-    coef = 0.9 / reference_proba
-    print(coef)
+    # reference_proba = 1
+    # time_for_20_min = int(20*60 / TIME_STEP)
+    # init_time = (8*3600 - 600) / TIME_STEP
+    # for t in range(time_for_20_min):
+    #     reference_proba *= pow(time_distribution(init_time + t), 1/time_for_20_min)
+    #
+    # coef = 0.9 / reference_proba
+    # print(coef)
 
     # print((3600 / TIME_STEP))

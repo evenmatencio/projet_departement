@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 
 import numpy as np
 
@@ -15,7 +16,7 @@ from multiprocessing import Pool
 # GLOBAL VARIABLES
 # -------------------------------------------------------------------------------------------------------------------
 
-TIME_RANGE = 5 * DAY_LENGTH
+TIME_RANGE = 5*DAY_LENGTH
 '''number of steps of the simulation'''
 SIZE_OF_FLEET = 100
 '''number of scooter in our simulation'''
@@ -58,10 +59,10 @@ if __name__ == "__main__":
     id = 0
     charging_lev = 80
     inputs_list = []
-    for discharged_thresh in np.linspace(15, 15, 1):  # 10 14 18
-        for discharged_prop in np.linspace(0.2, 0.8, 1):  # 4
-            for pick_up_threhs in np.linspace(15, 24, 1):  # 4
-                for charg_slot in [DAY_LENGTH // 3]: #, DAY_LENGTH // 2, DAY_LENGTH]:
+    for discharged_thresh in np.linspace(22, 30, 3):  # 3
+        for discharged_prop in np.linspace(0.2, 0.8, 4):  # 4
+            for pick_up_threhs in np.linspace(15, 24, 4):  # 4
+                for charg_slot in [DAY_LENGTH // 3, DAY_LENGTH // 2, DAY_LENGTH]:
                     # print(f"\n Simulation n°{id}")
                     inputs_list.append([charg_slot, discharged_prop, discharged_thresh, pick_up_threhs, charging_lev, id])
                     id+=1
@@ -81,14 +82,13 @@ if __name__ == "__main__":
                     # simulation = {"id" : id,  "param" : param, "cost" : cost, "total_cost" : total_cost}
                     # id+=1
                     # results_list.append(simulation)
-    print("main lunched")
     with Pool(4) as p:
         results_list = p.map(exec_simul, inputs_list)
 
-    print("\n ________________________________ \n")
-    print(f"Nombre simul = {len(results_list)}")
-    print(f"Premier simul")
-    print(results_list[0])
+    # print("\n ________________________________ \n")
+    # print(f"Nombre simul = {len(results_list)}")
+    # print(f"Premier simul")
+    # print(results_list[0])
 
     with open('simul1_output.json', 'w') as outfile:
         json.dump(results_list, outfile)
