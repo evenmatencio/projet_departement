@@ -1,0 +1,15 @@
+# simul_output_even_23052022 
+----------------------------
+
+¤ Donnees testees :
+ 
+for discharged_thresh in np.linspace(22, 30, 3):  # 3
+         for discharged_prop in np.linspace(0.2, 0.8, 4):  # 4
+             for pick_up_threhs in np.linspace(15, 24, 4):  # 4
+    			for charg_slot in [DAY_LENGTH//4, DAY_LENGTH // 3, DAY_LENGTH // 2, DAY_LENGTH, 2*DAY_LENGTH]
+
+¤ Strategie utilisée : FirstChargingStategy
+
+¤ Silly back_in_town
+
+¤ Remarques : calcul de coût au moment de la redistribution --> pas pertinent
