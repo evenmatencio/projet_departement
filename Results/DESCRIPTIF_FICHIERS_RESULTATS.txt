@@ -13,3 +13,45 @@ for discharged_thresh in np.linspace(22, 30, 3):  # 3
 ¤ Silly back_in_town
 
 ¤ Remarques : calcul de coût au moment de la redistribution --> pas pertinent
+
+
+# loop_on_charging_slot
+-----------------------
+
+¤ Donnees testees :
+
+charging_lev = 80
+pick_up_threhs = 21.0
+discharged_thresh = 22.0
+discharged_prop = 0.6
+for charg_slot in [DAY_LENGTH//4, DAY_LENGTH // 3, DAY_LENGTH // 2, DAY_LENGTH, 2*DAY_LENGTH]:
+
+¤ Strategie utilisée : FirstChargingStategy
+
+¤ Silly back_in_town
+quatre
+¤ Remarques : Mieux mais il faut essayer avec smart_back_in_town. Calcul du coût de distribution toutes les quatre heures 
+
+
+# loop_ChrgSlt_new_bit :
+------------------------
+
+¤ Données testees :
+
+charging_lev = 80
+pick_up_threhs = 21.0
+discharged_thresh = 22.0
+discharged_prop = 0.6
+for charg_slot in [DAY_LENGTH//4, DAY_LENGTH // 3, DAY_LENGTH // 2, DAY_LENGTH, 2*DAY_LENGTH]:
+
+¤ Strategie utilisée : FirstChargingStategy
+
+¤ smart_back_in_town0
+
+¤ Toujours pas bon, coùut de distribution constant. Calcul du coût de distribution toutes les trois heures, mais maillage de la carte sur le 
+coût de distribution de 10 en 10.
+
+
+
+
+

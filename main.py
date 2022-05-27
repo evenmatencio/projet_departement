@@ -23,10 +23,10 @@ SIZE_OF_FLEET = 100
 
 
 def exec_simul(input):
-    strategy = FirstChargingStrategy(TIME_RANGE, SIZE_OF_FLEET, render=False, verbose=False)
+    strategy = FirstChargingStrategy(TIME_RANGE, SIZE_OF_FLEET, interest_pt= [INTEREST_POINT_2, INTEREST_POINT_1], render=False, verbose=False)
     strategy.set_parameters(charging_slot=input[0], discharged_proportion=input[1],
-                            discharge_threshold=input[2],
-                            pick_up_threshold=input[3], charging_level=input[4])
+                            discharge_threshold=input[2], pick_up_threshold=input[3], charging_level=input[4],
+                            location_nbr=input[5], scoot_max_per_loc=input[6])
     strategy.launch()
     # Storing the data
     param = {"charging_slot": input[0], "discharged_proportion": input[1],
@@ -35,7 +35,7 @@ def exec_simul(input):
     cost = {"transport": strategy.transporting_cost, "distribution": strategy.repartition_cost}
     total_cost = strategy.transporting_cost + strategy.repartition_cost
     benef = strategy.benefice
-    simulation = {"id": input[5], "param": param, "cost": cost, "total_cost": total_cost, "benefice": benef}
+    simulation = {"id": input[7], "param": param, "cost": cost, "total_cost": total_cost, "benefice": benef}
     return simulation
 
 
@@ -44,9 +44,57 @@ def exec_simul(input):
 # -------------------------------------------------------------------------------------------------------------------
 
 if __name__ == "__main__":
+
     '''
     TOUTES LES GRANDEURS DOIVENT ETRE DONNEES EN NOMBRE DE TIME_STEP.
+    
+    La variable inputs_list est une liste contenant des jeux de parameres sur lesquels doivent etre lancees les simulations.
     '''
+
+    strat = FirstChargingStrategy(time_range= DAY_LENGTH, nbr_scooters=100,
+                                  interest_pt=[INTEREST_POINT_1, INTEREST_POINT_2], render=False)
+    strat.set_parameters(discharged_proportion=0.6, discharge_threshold=22.0, pick_up_threshold=21.0, charging_level=80,
+                         location_nbr=10, scoot_max_per_loc=16, charging_slot=DAY_LENGTH//8)
+    strat.launch()
+    # strat.step()
+    # plt.show()
+    print(strat.nbr_found )
+
+
+    # results_list = []
+    # id = 0
+    # charging_lev = 80
+    # pick_up_threhs = 21.0
+    # discharged_thresh = 22.0
+    # discharged_prop = 0.6
+    # loc_nbr = 10
+    # nbr_max_per_loc = 16
+    #
+    # inputs_list = []
+    # # for discharged_thresh in np.linspace(22, 30, 3):  # 3
+    # #     for discharged_prop in np.linspace(0.2, 0.8, 4):  # 4
+    # #         for pick_up_threhs in np.linspace(15, 24, 4):  # 4
+    # for charg_slot in [DAY_LENGTH//4, DAY_LENGTH // 3, DAY_LENGTH // 2, DAY_LENGTH, 2*DAY_LENGTH]:
+    #     # print(f"\n Simulation n°{id}")
+    #     inputs_list.append([charg_slot, discharged_prop, discharged_thresh, pick_up_threhs, charging_lev, loc_nbr, nbr_max_per_loc, id])
+    #     id+=1
+    #
+    # with Pool(4) as p:
+    #     results_list = p.map(exec_simul, inputs_list)
+    #
+    # print("\n ________________________________ \n")
+    # print(f"Nombre simul = {len(results_list)}")
+    # print(f"Premier simul")
+    # print(results_list[0])
+    #
+    # with open('loop_ChrgSlt_new_bit.json', 'w') as outfile:
+    #     json.dump(results_list, outfile)
+
+    # strategy.init_plot()
+    # strategy.points.append(strategy.ax.plot(INTEREST_POINT_2.x, INTEREST_POINT_2.y, marker='s', linestyle='None', markersize=10, color='b')[0])
+    # strategy.points.append(strategy.ax.plot(INTEREST_POINT_1.x, INTEREST_POINT_1.y, marker='s', linestyle='None', markersize=10, color='b')[0])
+    # plt.show()
+
 
     '''
     REMARQUES :
@@ -54,46 +102,3 @@ if __name__ == "__main__":
     Expliquer comment on été calibré les couts :     strategy.set_parameters(charging_slot = DAY_LENGTH//3, discharged_proportion = 0.20, discharge_threshold = 20,
                             pick_up_threshold = 30, charging_level = 80) donne transport_cost=278.419052451516  et repartition_cost=376.8368831790888
     '''
-
-    results_list = []
-    id = 0
-    charging_lev = 80
-    inputs_list = []
-    for discharged_thresh in np.linspace(22, 30, 3):  # 3
-        for discharged_prop in np.linspace(0.2, 0.8, 4):  # 4
-            for pick_up_threhs in np.linspace(15, 24, 4):  # 4
-                for charg_slot in [DAY_LENGTH // 3, DAY_LENGTH // 2, DAY_LENGTH]:
-                    # print(f"\n Simulation n°{id}")
-                    inputs_list.append([charg_slot, discharged_prop, discharged_thresh, pick_up_threhs, charging_lev, id])
-                    id+=1
-
-                    # # Running the simulation
-                    # strategy = FirstChargingStrategy(TIME_RANGE, SIZE_OF_FLEET, render=False, verbose=False)
-                    # strategy.set_parameters(charging_slot=charg_slot, discharged_proportion=discharged_prop,
-                    #                         discharge_threshold=discharged_thresh,
-                    #                         pick_up_threshold=pick_up_threhs, charging_level=charging_lev)
-                    # strategy.launch()
-                    # # Storing the data
-                    # param = {"charging_slot" : charg_slot, "discharged_proportion" : discharged_prop,
-                    #          "discharge_threshold" : discharged_thresh, "pick_up_threshold" : pick_up_threhs,
-                    #          "charging_level" : charging_lev}
-                    # cost = {"transport" : strategy.transporting_cost, "distribution" : strategy.repartition_cost}
-                    # total_cost = strategy.transporting_cost + strategy.repartition_cost
-                    # simulation = {"id" : id,  "param" : param, "cost" : cost, "total_cost" : total_cost}
-                    # id+=1
-                    # results_list.append(simulation)
-    with Pool(4) as p:
-        results_list = p.map(exec_simul, inputs_list)
-
-    # print("\n ________________________________ \n")
-    # print(f"Nombre simul = {len(results_list)}")
-    # print(f"Premier simul")
-    # print(results_list[0])
-
-    with open('simul1_output.json', 'w') as outfile:
-        json.dump(results_list, outfile)
-
-    # strategy.init_plot()
-    # strategy.points.append(strategy.ax.plot(INTEREST_POINT_2.x, INTEREST_POINT_2.y, marker='s', linestyle='None', markersize=10, color='b')[0])
-    # strategy.points.append(strategy.ax.plot(INTEREST_POINT_1.x, INTEREST_POINT_1.y, marker='s', linestyle='None', markersize=10, color='b')[0])
-    # plt.show()

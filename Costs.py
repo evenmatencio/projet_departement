@@ -24,6 +24,7 @@ AVERAGE_TRIP_DURATION = 12
 '''Avergar trip duration in [minutes] taken from https://www.sciencedirect.com/science/article/pii/S2214367X19303126?ref=pdf_download&fr=RR-2&rr=70dc7315287a403d'''
 
 SPATIAL_COST_PONDERATION = 2*math.sqrt(SPATIAL_SIGMA)
+TEMPORAL_COST_PONDERATION = 2*143
 
 BEGIN_HOUR = 0
 "hour of the begining of the simulation"
@@ -49,11 +50,6 @@ def unitary_opportunity_cost(location='Paris'):
         return AVERAGE_TRIP_DURATION * cost_per_minute + unlock_cost
 
 
-def space_demand(t):
-    # renvoyer un coefficient lie a la demande spatiale
-    return 1
-
-
 def time_demand(t):
     proba = 1
     for s in range(250):
@@ -77,14 +73,19 @@ def near_enough(list_of_scooters, i, j):
 
 def measure_distribution(list_of_scooters, t):
     unitary_cost = unitary_opportunity_cost()
-    time_ponderation = time_distribution(t)
+    time_ponderation = TEMPORAL_COST_PONDERATION*time_distribution(t)
     cost_of_distribution = 0
+    nbr_found = 0
     for i in range(0, MAP_SIZE, 5):
         for j in range(0, MAP_SIZE, 5):
             if not (near_enough(list_of_scooters, i, j)):
                 space_ponderation = SPATIAL_COST_PONDERATION*spatial_distribution(Point(i, j))
                 cost_of_distribution += time_ponderation * space_ponderation * unitary_cost
-    return cost_of_distribution
+                #print(f"(i, j) = ({i}, {j})")
+                #print(f"unitar c_f_d : {time_ponderation * space_ponderation * unitary_cost}")
+            else :
+                nbr_found+=1
+    return cost_of_distribution, nbr_found
 
 
 def transport_cost(transported_scooters):
@@ -97,14 +98,17 @@ def transport_cost(transported_scooters):
     return COST_DISTANCE_TRAVELLED * best_fitness
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    temps = range(0, int(24*3600 / TIME_STEP))
-    temp_distri_function = [time_distribution(t) for t in temps]
-    plt.plot([TIME_STEP*t/3600 for t in temps], temp_distri_function)
-    plt.title("Temporal distribution of the demand (not normalized)")
-    plt.xlabel("Time [in h]")
-    plt.show()
+    # temps = range(0, int(24*3600 / TIME_STEP))
+    # temp_distri_function = [time_distribution(t) for t in temps]
+    # plt.plot([TIME_STEP*t/3600 for t in temps], temp_distri_function)
+    # plt.title("Temporal distribution of the demand (not normalized)")
+    # plt.xlabel("Time [in h]")
+    # plt.show()
+
+
+
 
     # reference_proba = 1
     # time_for_20_min = int(20*60 / TIME_STEP)

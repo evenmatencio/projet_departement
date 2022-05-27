@@ -39,7 +39,7 @@ AMBIENT_TEMPERATURE = 293
 #------------------------
 AVERAGE_SPEED = 20
 '''For the seek of simplification, the average speed is given as the highest speed allowed in cities [km/h]'''
-CHARGING_DURATION = 3*3600 / TIME_STEP
+CHARGING_DURATION = 3*3600 / (TIME_STEP*10)
 '''Average duration of the charging of a scooter, '''
 EXCHANGE_SURFACE = 1 #0.05 on prends 1 en considérant que le R=0.75 prends deja en compte la surface
 '''Surface of exchange with ambient air'''
@@ -61,7 +61,7 @@ SPATIAL_PONDERATION = 20*math.sqrt(SPATIAL_SIGMA)
 '''A coefficient supposed to make the spatial distribution more realistic'''
 TIME_SIGMA= 2*3600
 '''standard deviation for the temporal gaussian law in the new trip'''
-INTER_ARRIVAL_FACTOR = 17268 #60
+INTER_ARRIVAL_FACTOR = 120 #60
 '''ensure that the mean inter-arrival time is about 20 minutes'''
 
 
@@ -99,6 +99,7 @@ class Scooter():
         self._soc = soc
         self._coord = coord
         self._moving = False
+        self._redistri_loc = None
         self._destination = self._coord
         self._charging = False
         self._charging_time = 0
@@ -141,6 +142,10 @@ class Scooter():
     def temperature(self):
         return self._temperature
 
+    @property
+    def redistri_loc(self):
+        return self._redistri_loc
+
     @coord.setter
     def coord(self, new_coord):
         assert new_coord.x >= 0 and new_coord.y >= 0, "negative coordinates"
@@ -175,6 +180,12 @@ class Scooter():
     def temperature(self, temp):
         assert temp >= 0, "temperature not negative"
         self._temperature = temp
+
+    @redistri_loc.setter
+    def redistri_loc(self, index):
+        self._redistri_loc = index
+
+
 
     # -------------------------------------------------------------------------------------------------------------------
     # OTHER METHODS
@@ -253,6 +264,8 @@ class Scooter():
         time_h = (distx + disty)*(SPACE_STEP/1000)/20
         time_m = time_h*60
         return time_m * cost_per_minute + unlock_cost
+
+
 #-------------------------------------------------------------------------------------------------------------
 # OTHER USEFUL FUNCTIONS
 #-------------------------------------------------------------------------------------------------------------
@@ -302,9 +315,10 @@ def spatial_distribution(position):
             np.exp(- (p2 - position).norm2()**2 / (2 * SPATIAL_SIGMA**2) ) )
             #(2 * math.sqrt(2*np.pi)*SPATIAL_SIGMA)
 
+
 def give_time(t, begin_hour=0):
     '''
-    :param t: total time elapsed since the beginning of the simulation in [s]
+    :param t: total time elapsed since the beginning of the simulation in [time_step number]
     :param begin_hour: hour of the beginning of the simulation in [h]
     :return: the current time in second in the frame of the current day
     '''

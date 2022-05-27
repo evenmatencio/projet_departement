@@ -18,6 +18,7 @@ ARG3 = "discharge_threshold"
 ARG4 = "pick_up_threshold"
 ARG5 = "charging_level"
 
+
 def extract_data(results, param, param_to_plot):
     '''
     :param results: list containing dicts that stores the results of simulation.
@@ -29,6 +30,7 @@ def extract_data(results, param, param_to_plot):
     tot_cost_list = []
     transport_cost_list = []
     repartition_cost_list = []
+    benefice_list = []
     param_to_plot_list= []
     for simul in results:
         match = True
@@ -40,8 +42,9 @@ def extract_data(results, param, param_to_plot):
             tot_cost_list.append(simul["total_cost"])
             transport_cost_list.append(simul["cost"]["transport"])
             repartition_cost_list.append(simul["cost"]["distribution"])
+            benefice_list.append(simul["benefice"])
             param_to_plot_list.append(simul["param"][param_to_plot])
-    return tot_cost_list, transport_cost_list, repartition_cost_list, param_to_plot_list
+    return tot_cost_list, transport_cost_list, repartition_cost_list, benefice_list, param_to_plot_list
 
 
 
@@ -52,20 +55,21 @@ def extract_data(results, param, param_to_plot):
 
 if __name__ == "__main__" :
 
-    with open(os.getcwd() + '/Results/simul_output_even_23052022.json') as json_file:
+    with open(os.getcwd() + '/Results/loop_ChrgSlt_new_bit_maillage5.json') as json_file:
         results = json.load(json_file)
 
-    print(results[0])
+    print(results)
 
     param1 = [ [ARG2, 0.6], [ARG3, 22.0], [ARG4, 21.0], [ARG5, 80] ]
     param_to_plot1 = ARG1
 
-    tot_cost, transport_cost, repartition_cost, arg = extract_data(results, param1, param_to_plot1)
+    tot_cost, transport_cost, repartition_cost, benefice_list, arg = extract_data(results, param1, param_to_plot1)
     arg_in_hour = [i/(3600/TIME_STEP) for i in arg]
 
     plt.plot(arg_in_hour, tot_cost, 'r', label="Total cost" )
     plt.plot(arg_in_hour, transport_cost, 'g', label="Transport cost")
     plt.plot(arg_in_hour, repartition_cost, 'b', label="Repartition cost")
+    plt.plot(arg_in_hour, benefice_list, color='orange', label="Benefice")
     plt.xticks(arg_in_hour)
     plt.ylabel("Costs in euros")
     plt.xlabel("Charging slots value [in hour]")
