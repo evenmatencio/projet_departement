@@ -277,6 +277,12 @@ def init_new_fleet(nbr_scooter):
         list_of_scooter.append(Scooter(Point.from_random(MAP_SIZE, MAP_SIZE)))
     return list_of_scooter
 
+def init_new_fleet_smart(nbr_scooter):
+    list_of_scooter = []
+    for i in range(nbr_scooter):
+        list_of_scooter.append(Scooter(Point(-20, -20)))
+    return list_of_scooter
+
 
 def give_destination(max_attempts=50) :
     spatial_ponderation = 1

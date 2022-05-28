@@ -120,8 +120,8 @@ class FirstChargingStrategy():
         # level under which we stop charging a scooter
         self.charging_duration = CHARGING_DURATION
         # charging_duration of the scooters
-        self.set_redistribution_locations(location_nbr, scoot_max_per_loc)
-        self.init_smart_positon()
+        #self.set_redistribution_locations(location_nbr, scoot_max_per_loc)
+        #self.init_smart_positon()
 
 
 
@@ -164,7 +164,8 @@ class FirstChargingStrategy():
 
     def init_smart_positon(self):
         for i in range(len(self.list_of_scooter)):
-            point = self.smart_back_in_town0(i)
+            #point = self.smart_back_in_town0(i)
+            point = smart_back_in_town(self.list_of_scooter)
             self.list_of_scooter[i].coord = point
 
 
@@ -200,6 +201,8 @@ class FirstChargingStrategy():
         assert self.set_up, "The strategy parameters are not defined !"
         # Environment evolution
         while self.time < self.time_range:
+            # if(self.time % 2000==0):
+            #     print(f"time = {self.time*9/3600}")
             # first_discharged = False
             # soc_list = [scoot.soc for scoot in self.list_of_scooter]
              # Stepping the environment
@@ -246,7 +249,7 @@ class FirstChargingStrategy():
                     scooter.move()
                 elif (not scooter.moving) and (scooter.soc >= 0):
                     if scooter.init_new_trip(self.time, BEGIN_HOUR):
-                        self.redistri_pts_loc[scooter.redistri_loc]['current_nbr'] -= 1
+                        #self.redistri_pts_loc[scooter.redistri_loc]['current_nbr'] -= 1
                         self.total_departures+=1
                         self.benefice += scooter.cost_of_trip()
                 # Updating plot
