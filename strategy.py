@@ -33,6 +33,7 @@ MIN_DISTANCE = MAP_SIZE//10
 
 def smart_back_in_town(fleet):
     placed = False
+    #print("back in town begin")
     while placed == False:
         point = Point.from_random(MAP_SIZE, MAP_SIZE)
         p = rd.random()
@@ -43,6 +44,7 @@ def smart_back_in_town(fleet):
                     far_enough = False
             if far_enough:
                 return point
+
 
 def smart_back_in_town1(fleet):
     placed = False
@@ -55,12 +57,13 @@ def smart_back_in_town1(fleet):
         p = rd.random()
         proba_point = SPATIAL_PONDERATION*spatial_distribution(point)
         attemps += 1
-        if p < SPATIAL_PONDERATION*spatial_distribution(point):
+        if p < 2*SPATIAL_PONDERATION*spatial_distribution(point):
             far_enough = True
             for other_scoot in fleet:
                 if ((point - other_scoot.coord).norm2() < MIN_DISTANCE):
                     far_enough = False
             if far_enough:
+                print("back in town smart")
                 return point
 
 
@@ -265,7 +268,8 @@ class FirstChargingStrategy():
             for j in recharged_list:
                 self.list_of_scooter[j].charging_time = 0
                 self.list_of_scooter[j].charging = False
-                init_pos = self.smart_back_in_town0(j)
+                #init_pos = self.smart_back_in_town0(j)
+                init_pos = smart_back_in_town(self.list_of_scooter)
                 self.list_of_scooter[j].coord = init_pos
                 self.list_of_scooter[j].moving = False
                 list_returning_scooter.append(self.list_of_scooter[j])
@@ -320,6 +324,8 @@ class SecondChargingStrategy(FirstChargingStrategy):
                 print(f"transport_cost={self.transporting_cost}")
                 print(f"repartition_cost={self.repartition_cost}")
                 print(f"benefice = {self.benefice}")
+                temperatures = [scooter.temperature for scooter in self.list_of_scooter]
+                print(f"max_temp = {max(temperatures)}")
             # Charging and replacing the scooters
             if self.time%DAY_LENGTH in self.charging_times:
                 # Distribution of the charged scooters
@@ -330,7 +336,7 @@ class SecondChargingStrategy(FirstChargingStrategy):
                 discharged_list = [(scooter.soc < self.discharge_threshold and not scooter.moving)
                                    for scooter in self.list_of_scooter]
                 self.charging(discharged_list)
-                self.repartition_cost += measure_distribution(self.list_of_scooter, self.time)
+                #self.repartition_cost += measure_distribution(self.list_of_scooter, self.time)
             # Computing the cost
             if self.time % COST_COMPUTATION_STEP == 0:
                 self.repartition_cost += measure_distribution(self.list_of_scooter, self.time)

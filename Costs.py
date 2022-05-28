@@ -5,7 +5,6 @@ import six
 
 sys.modules['sklearn.externals.six'] = six
 import mlrose
-import numpy as np
 
 sys.path.append(os.path.abspath("./"))
 from scooter import *

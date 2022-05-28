@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 
 import os
 import sys
-import seaborn as sns
-sns.set_theme()
+# import seaborn as sns
+# sns.set_theme()
 
 sys.path.append(os.path.abspath("./"))
 
@@ -30,8 +30,43 @@ from scooter import *
 
 
 
+#
+#
+# list_prob = []
+#
+# for i in range(100):
+#     point = Point.from_random(MAP_SIZE,MAP_SIZE)
+#     list_prob.append(SPATIAL_PONDERATION*spatial_distribution(point))
+#
+# print(max(list_prob))
+#
+
+proba = 1
+K = 120
 
 
 
 
 
+def time_distribution2(t, begin_hour=0):
+    '''WARNING : t must be a number of time steps'''
+    return (1 / (2*math.sqrt(2 * np.pi)*TIME_SIGMA) ) * \
+            (np.exp(-(give_time(t, begin_hour) - 8 * 3600) ** 2 / (2 * TIME_SIGMA** 2)) +
+             np.exp(-(give_time(t, begin_hour) - 13 * 3600) ** 2 / (2 * (5*TIME_SIGMA) ** 2)) +
+            np.exp(-(give_time(t, begin_hour) - 18 * 3600) ** 2 / (2 * TIME_SIGMA** 2)))
+    # (2 * math.sqrt(2 * np.pi)*TIME_SIGMA**2)  *
+
+for t in range(int((8*3600/9)),int((8*3600/9)+144)):
+    proba*=(1-K*time_distribution2(t))
+print(proba)
+
+
+X=[]
+Y=[]
+
+for t in range(int((0*3600/9)),int((24*3600/9))):
+    X.append(t*9/3600)
+    Y.append(K*time_distribution2(t))
+
+plt.plot(X,Y)
+plt.show()

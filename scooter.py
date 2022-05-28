@@ -1,7 +1,7 @@
 """
 Class for scooters
 """
-import math
+
 import os
 import sys
 import matplotlib.pyplot as plt
@@ -226,10 +226,10 @@ class Scooter():
             for i in range(TIME_STEP):
                 self.temperature = self.temperature + (1 / (BATTERY_MASS * BATTERY_THERMAL_CAPACITY)) * (
                         (AMBIENT_TEMPERATURE - self.temperature) * (
-                            1/0.75) * EXCHANGE_SURFACE) + int(self.moving)*0.016
+                            1/0.75) * EXCHANGE_SURFACE)
             self.temperature = self.temperature + (0.2 / (BATTERY_MASS * BATTERY_THERMAL_CAPACITY)) * (
                     (AMBIENT_TEMPERATURE - self.temperature) * (
-                        1/0.75) * EXCHANGE_SURFACE) + 0.2*int(self.moving)*0.016
+                        1/0.75) * EXCHANGE_SURFACE)
         if self.moving:
             for i in range(TIME_STEP):
                 self.temperature = self.temperature + (1 / (BATTERY_MASS * BATTERY_THERMAL_CAPACITY)) * (
