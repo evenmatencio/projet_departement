@@ -265,7 +265,7 @@ class FirstChargingStrategy():
             for j in recharged_list:
                 self.list_of_scooter[j].charging_time = 0
                 self.list_of_scooter[j].charging = False
-                init_pos = silly_back_in_town(self.list_of_scooter)
+                init_pos = self.smart_back_in_town0(j)
                 self.list_of_scooter[j].coord = init_pos
                 self.list_of_scooter[j].moving = False
                 list_returning_scooter.append(self.list_of_scooter[j])

@@ -36,6 +36,7 @@ def exec_simul(input):
     total_cost = strategy.transporting_cost + strategy.repartition_cost
     benef = strategy.benefice
     simulation = {"id": input[7], "param": param, "cost": cost, "total_cost": total_cost, "benefice": benef}
+    print("simul", input[7])
     return simulation
 
 
@@ -87,7 +88,7 @@ if __name__ == "__main__":
     # print(f"Premier simul")
     # print(results_list[0])
     #
-    with open('new_cost_and_silly_bit.json', 'w') as outfile:
+    with open('new_cost_and_self_smart_bit.json', 'w') as outfile:
         json.dump(results_list, outfile)
 
     # strategy.init_plot()
