@@ -265,7 +265,7 @@ class FirstChargingStrategy():
             for j in recharged_list:
                 self.list_of_scooter[j].charging_time = 0
                 self.list_of_scooter[j].charging = False
-                init_pos = self.smart_back_in_town0(j)
+                init_pos = silly_back_in_town(self.list_of_scooter)
                 self.list_of_scooter[j].coord = init_pos
                 self.list_of_scooter[j].moving = False
                 list_returning_scooter.append(self.list_of_scooter[j])
@@ -330,7 +330,8 @@ class SecondChargingStrategy(FirstChargingStrategy):
                 discharged_list = [(scooter.soc < self.discharge_threshold and not scooter.moving)
                                    for scooter in self.list_of_scooter]
                 self.charging(discharged_list)
-                self.repartition_cost += measure_distribution(self.list_of_scooter, self.time)
+                self.repartition_cost += measure_distribution(self.list_of_scooter, self.time)[0]
+                self.nbr_found += measure_distribution(self.list_of_scooter, self.time)[1]
             # Computing the cost
             if self.time % COST_COMPUTATION_STEP == 0:
                 self.repartition_cost += measure_distribution(self.list_of_scooter, self.time)

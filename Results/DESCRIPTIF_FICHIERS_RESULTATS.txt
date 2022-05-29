@@ -15,43 +15,41 @@ for discharged_thresh in np.linspace(22, 30, 3):  # 3
 ¤ Remarques : calcul de coût au moment de la redistribution --> pas pertinent
 
 
-# loop_on_charging_slot
------------------------
 
-¤ Donnees testees :
 
+# simul_smart_back1_output
+----------------------------
+
+Grosse simulation de raph sur son back_in_town
+
+
+
+# corect_cost 
+--------------
+
+results_list = []
+id = 0
 charging_lev = 80
 pick_up_threhs = 21.0
 discharged_thresh = 22.0
 discharged_prop = 0.6
-for charg_slot in [DAY_LENGTH//4, DAY_LENGTH // 3, DAY_LENGTH // 2, DAY_LENGTH, 2*DAY_LENGTH]:
-
-¤ Strategie utilisée : FirstChargingStategy
-
-¤ Silly back_in_town
-quatre
-¤ Remarques : Mieux mais il faut essayer avec smart_back_in_town. Calcul du coût de distribution toutes les quatre heures 
+loc_nbr = 10
+nbr_max_per_loc = 16
+inputs_list = []
+for charg_slot in [DAY_LENGTH//16, DAY_LENGTH//10, DAY_LENGTH//8, DAY_LENGTH//4, DAY_LENGTH//2, DAY_LENGTH]:
 
 
-# loop_ChrgSlt_new_bit :
-------------------------
+TEMPORAL_COST_PONDERATION = 4*2*143*4/(3*5)
+INTER_ARRIVAL_FACTOR = 120 
 
-¤ Données testees :
+else :
+	nbr_found+=1
+	cost_of_distribution -= time_ponderation * space_ponderation * unitary_cost
 
-charging_lev = 80
-pick_up_threhs = 21.0
-discharged_thresh = 22.0
-discharged_prop = 0.6
-for charg_slot in [DAY_LENGTH//4, DAY_LENGTH // 3, DAY_LENGTH // 2, DAY_LENGTH, 2*DAY_LENGTH]:
+for i in range(0, MAP_SIZE, 10):
+	for j in range(0, MAP_SIZE, 10):
 
-¤ Strategie utilisée : FirstChargingStategy
+COST_COMPUTATION_STEP = (3600 / TIME_STEP)
 
-¤ smart_back_in_town0
-
-¤ Toujours pas bon, coùut de distribution constant. Calcul du coût de distribution toutes les trois heures, mais maillage de la carte sur le 
-coût de distribution de 10 en 10.
-
-
-
-
+MIN_DISTANCE = MAP_SIZE//10
 

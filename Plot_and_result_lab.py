@@ -55,7 +55,7 @@ def extract_data(results, param, param_to_plot):
 
 if __name__ == "__main__" :
 
-    with open(os.getcwd() + '/Results/loop_ChrgSlt_new_bit_maillage5.json') as json_file:
+    with open(os.getcwd() + '/Results/correct_cost.json') as json_file:
         results = json.load(json_file)
 
     print(results)
