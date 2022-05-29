@@ -24,7 +24,7 @@ AVERAGE_TRIP_DURATION = 12
 '''Avergar trip duration in [minutes] taken from https://www.sciencedirect.com/science/article/pii/S2214367X19303126?ref=pdf_download&fr=RR-2&rr=70dc7315287a403d'''
 
 SPATIAL_COST_PONDERATION = 2*math.sqrt(SPATIAL_SIGMA)
-TEMPORAL_COST_PONDERATION = 2*143
+TEMPORAL_COST_PONDERATION = 4*2*143*4/(3*5)
 
 BEGIN_HOUR = 0
 "hour of the begining of the simulation"
@@ -76,15 +76,16 @@ def measure_distribution(list_of_scooters, t):
     time_ponderation = TEMPORAL_COST_PONDERATION*time_distribution(t)
     cost_of_distribution = 0
     nbr_found = 0
-    for i in range(0, MAP_SIZE, 5):
-        for j in range(0, MAP_SIZE, 5):
+    for i in range(0, MAP_SIZE, 10):
+        for j in range(0, MAP_SIZE, 10):
+            space_ponderation = SPATIAL_COST_PONDERATION * spatial_distribution(Point(i, j))
             if not (near_enough(list_of_scooters, i, j)):
-                space_ponderation = SPATIAL_COST_PONDERATION*spatial_distribution(Point(i, j))
                 cost_of_distribution += time_ponderation * space_ponderation * unitary_cost
                 #print(f"(i, j) = ({i}, {j})")
                 #print(f"unitar c_f_d : {time_ponderation * space_ponderation * unitary_cost}")
-            else :
-                nbr_found+=1
+            else:
+                nbr_found += 1
+                cost_of_distribution -= time_ponderation * space_ponderation * unitary_cost
     return cost_of_distribution, nbr_found
 
 

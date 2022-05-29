@@ -51,44 +51,44 @@ if __name__ == "__main__":
     La variable inputs_list est une liste contenant des jeux de parameres sur lesquels doivent etre lancees les simulations.
     '''
 
-    strat = FirstChargingStrategy(time_range= DAY_LENGTH, nbr_scooters=100,
-                                  interest_pt=[INTEREST_POINT_1, INTEREST_POINT_2], render=False)
-    strat.set_parameters(discharged_proportion=0.6, discharge_threshold=22.0, pick_up_threshold=21.0, charging_level=80,
-                         location_nbr=10, scoot_max_per_loc=16, charging_slot=DAY_LENGTH//8)
-    strat.launch()
-    # strat.step()
-    # plt.show()
-    print(strat.nbr_found )
+    # strat = FirstChargingStrategy(time_range= DAY_LENGTH, nbr_scooters=100,
+    #                               interest_pt=[INTEREST_POINT_1, INTEREST_POINT_2], render=False)
+    # strat.set_parameters(discharged_proportion=0.6, discharge_threshold=22.0, pick_up_threshold=21.0, charging_level=80,
+    #                      location_nbr=10, scoot_max_per_loc=16, charging_slot=DAY_LENGTH//8)
+    # strat.launch()
+    # # strat.step()
+    # # plt.show()
+    # print(strat.nbr_found )
 
 
-    # results_list = []
-    # id = 0
-    # charging_lev = 80
+    #results_list = []
+    id = 0
+    charging_lev = 80
     # pick_up_threhs = 21.0
     # discharged_thresh = 22.0
     # discharged_prop = 0.6
-    # loc_nbr = 10
-    # nbr_max_per_loc = 16
+    loc_nbr = 10
+    nbr_max_per_loc = 16
+
+    inputs_list = []
+    for discharged_thresh in np.linspace(10, 30, 6):  # 3
+         for discharged_prop in np.linspace(0.2, 0.8, 4):  # 4
+             for pick_up_threhs in np.linspace(15, 24, 4):  # 4
+                 for charg_slot in [2*3600/TIME_STEP, 3*3600/TIME_STEP, 4*3600/TIME_STEP, 6*3600/TIME_STEP, 12*3600/TIME_STEP, 24*3600/TIME_STEP]:
+        # print(f"\n Simulation n°{id}")
+                    inputs_list.append([charg_slot, discharged_prop, discharged_thresh, pick_up_threhs, charging_lev, loc_nbr, nbr_max_per_loc, id])
+                    id+=1
     #
-    # inputs_list = []
-    # # for discharged_thresh in np.linspace(22, 30, 3):  # 3
-    # #     for discharged_prop in np.linspace(0.2, 0.8, 4):  # 4
-    # #         for pick_up_threhs in np.linspace(15, 24, 4):  # 4
-    # for charg_slot in [DAY_LENGTH//4, DAY_LENGTH // 3, DAY_LENGTH // 2, DAY_LENGTH, 2*DAY_LENGTH]:
-    #     # print(f"\n Simulation n°{id}")
-    #     inputs_list.append([charg_slot, discharged_prop, discharged_thresh, pick_up_threhs, charging_lev, loc_nbr, nbr_max_per_loc, id])
-    #     id+=1
-    #
-    # with Pool(4) as p:
-    #     results_list = p.map(exec_simul, inputs_list)
+    with Pool(4) as p:
+        results_list = p.map(exec_simul, inputs_list)
     #
     # print("\n ________________________________ \n")
     # print(f"Nombre simul = {len(results_list)}")
     # print(f"Premier simul")
     # print(results_list[0])
     #
-    # with open('loop_ChrgSlt_new_bit.json', 'w') as outfile:
-    #     json.dump(results_list, outfile)
+    with open('new_cost_and_silly_bit.json', 'w') as outfile:
+        json.dump(results_list, outfile)
 
     # strategy.init_plot()
     # strategy.points.append(strategy.ax.plot(INTEREST_POINT_2.x, INTEREST_POINT_2.y, marker='s', linestyle='None', markersize=10, color='b')[0])
