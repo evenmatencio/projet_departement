@@ -92,7 +92,7 @@ if __name__ == "__main__":
     # with open('loop_ChrgSlt_new_bit.json', 'w') as outfile:
 
 
-    with open('simul_smart_back_output_test.json', 'w') as outfile:
+    with open('simul_smart_back1_output.json', 'w') as outfile:
         json.dump(results_list, outfile)
 
     # strategy.init_plot()

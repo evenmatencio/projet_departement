@@ -34,16 +34,18 @@ MIN_DISTANCE = MAP_SIZE//10
 def smart_back_in_town(fleet):
     placed = False
     #print("back in town begin")
+    count=1
     while placed == False:
         point = Point.from_random(MAP_SIZE, MAP_SIZE)
         p = rd.random()
-        if p < 2*SPATIAL_PONDERATION*spatial_distribution(point):
+        if p < 2*np.sqrt(count)*SPATIAL_PONDERATION*spatial_distribution(point):
             far_enough = True
             for other_scoot in fleet:
                 if ((point - other_scoot.coord).norm2() < MIN_DISTANCE):
                     far_enough = False
             if far_enough:
                 return point
+        count+=1
 
 
 def smart_back_in_town1(fleet):
@@ -63,8 +65,9 @@ def smart_back_in_town1(fleet):
                 if ((point - other_scoot.coord).norm2() < MIN_DISTANCE):
                     far_enough = False
             if far_enough:
-                print("back in town smart")
                 return point
+    point2 = Point.from_random(MAP_SIZE, MAP_SIZE)
+    return point2
 
 
 def silly_back_in_town(fleet):
@@ -165,7 +168,7 @@ class FirstChargingStrategy():
     def init_smart_positon(self):
         for i in range(len(self.list_of_scooter)):
             #point = self.smart_back_in_town0(i)
-            point = smart_back_in_town(self.list_of_scooter)
+            point = smart_back_in_town1(self.list_of_scooter)
             self.list_of_scooter[i].coord = point
 
 
@@ -222,19 +225,23 @@ class FirstChargingStrategy():
                 print(f'nbr_foud = {self.nbr_found}')
             # Charging and replacing the scooters
             if self.time % self.charging_slot == 0 :
+                #print(f"begin distrib at time = {self.time * 9 / 3600}")
                 # Distribution of the charged scooters
                 recharged_list = [i for i in range(len(self.list_of_scooter)) if
                                   self.list_of_scooter[i].charging_time >= self.charging_duration]
                 self.distribution(recharged_list)
+                #print(f"ended distrib at time = {self.time * 9 / 3600}")
                 # Charging the scooters that need it
                 discharged_list = [(scooter.soc < self.discharge_threshold and not scooter.moving)
                                    for scooter in self.list_of_scooter]
                 self.charging(discharged_list)
+                #print(f"ended charging at time = {self.time*9/3600}")
             # Computing the cost
             if self.time % COST_COMPUTATION_STEP == 0:
                 repartition_cost, nbr_found = measure_distribution(self.list_of_scooter, self.time)
                 self.repartition_cost += repartition_cost
                 self.nbr_found += nbr_found
+                # print(f"computed repartition at time = {self.time * 9 / 3600}")
 
 
     def step(self):
@@ -267,12 +274,16 @@ class FirstChargingStrategy():
 
     def distribution(self, recharged_list):
         list_returning_scooter=[]
+        # print(f"len dscharged list={len(recharged_list)}")
+        # counter = 0
         if len(recharged_list) > 1:
             for j in recharged_list:
+                # if counter%10==0:
+                #     print(f"returned {counter} scooters")
                 self.list_of_scooter[j].charging_time = 0
                 self.list_of_scooter[j].charging = False
                 #init_pos = self.smart_back_in_town0(j)
-                init_pos = smart_back_in_town(self.list_of_scooter)
+                init_pos = smart_back_in_town1(self.list_of_scooter)
                 self.list_of_scooter[j].coord = init_pos
                 self.list_of_scooter[j].moving = False
                 list_returning_scooter.append(self.list_of_scooter[j])
@@ -280,6 +291,7 @@ class FirstChargingStrategy():
                     self.points[j].set_data(init_pos.x, init_pos.y)
                     self.points[j].set_color(BATTERY_COLORS(int(self.list_of_scooter[j].soc)))
                     self.points[j].set_marker('s')
+                # counter+=1
             self.transporting_cost += transport_cost(list_returning_scooter)
 
 
